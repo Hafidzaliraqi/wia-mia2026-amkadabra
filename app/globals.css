@@ -1,26 +1,42 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Token warna. Pakai di class Tailwind, contoh: bg-kertas, text-rambu, border-garis */
+@theme {
+  --color-tinta: #13233d; /* teks utama */
+  --color-tinta-redup: #4a5a72; /* teks sekunder */
+  --color-kertas: #f3f5f7; /* latar halaman */
+  --color-garis: #d8dee6; /* garis dan border */
+  --color-rambu: #1f4fa8; /* aksi utama dan link */
+  --color-rambu-tua: #173d84;
+  --color-rambu-muda: #e6edf9;
+  --color-tuntas: #157347; /* selesai */
+  --color-tuntas-muda: #e3f2ea;
+  --color-waspada: #8a5100; /* tenggat dekat, menunggu */
+  --color-waspada-muda: #fcf1df;
+  --color-waspada-terang: #d99a1c; /* khusus bar progres */
+  --color-bahaya: #b42318; /* terlambat, ditolak */
+  --color-bahaya-muda: #fbe9e7;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-kertas);
+  color: var(--color-tinta);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-rambu);
+  outline-offset: 2px;
+}
+
+/* Angka sejajar (nomor laporan, statistik, waktu) */
+.angka {
+  font-variant-numeric: tabular-nums;
 }
