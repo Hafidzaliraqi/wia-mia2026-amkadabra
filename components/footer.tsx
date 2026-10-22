@@ -9,13 +9,15 @@ export function Footer() {
           <p className="font-bold text-tinta">{situs.nama}</p>
           <p>{situs.deskripsi}</p>
           <p className="text-xs">
-            Seluruh data di situs ini adalah data simulasi untuk Web In Action (WIA) MIA 2026.
+            Prototipe untuk Web In Action (WIA) MIA 2026. Data laporan dan kinerja instansi yang ditampilkan adalah data
+            simulasi, bukan data resmi pemerintah daerah.
           </p>
         </div>
         <nav aria-label="Tautan bawah" className="flex flex-wrap gap-x-6 gap-y-2 md:flex-col">
           <Link href="/laporan" className="hover:text-tinta">Jelajah laporan</Link>
           <Link href="/transparansi" className="hover:text-tinta">Rapor instansi</Link>
           <Link href="/lapor" className="hover:text-tinta">Buat laporan</Link>
+          <Link href="/masuk" className="hover:text-tinta">Masuk petugas</Link>
         </nav>
       </div>
     </footer>

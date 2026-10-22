@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tuntasin
 
-## Getting Started
+Tuntasin adalah platform pelaporan warga yang meneruskan laporan ke instansi yang tepat secara otomatis, menampilkan batas waktu setiap tahap ke publik, dan baru menutup laporan setelah warga mengonfirmasi masalahnya benar-benar beres. Dibuat untuk Web In Action (WIA) MIA 2026, subtema Civic Reporting & Accountability.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 16 (App Router, Server Actions, Cache Components) + TypeScript
+- Tailwind CSS 4
+- PostgreSQL: PGlite untuk pengembangan lokal, Neon/Supabase saat online
+- Leaflet + OpenStreetMap untuk peta lokasi laporan
+- Nodemailer (SMTP Gmail) untuk kode OTP dan email pemberitahuan
+- exifr untuk membaca waktu dan lokasi foto (deteksi laporan palsu)
+
+## Cara Menjalankan
+
+Prasyarat: Node.js 24 LTS dan Git.
 
 ```bash
+git clone https://github.com/Hafidzaliraqi/wia-mia2026-amkadabra.git
+cd wia-mia2026-amkadabra
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka http://localhost:3000. Saat pertama kali dibuka, database lokal dibuat otomatis di folder `.data/` lengkap dengan data contoh (sekitar 10 detik).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Pengaturan opsional ada di `.env.example`. Salin menjadi `.env.local` lalu isi:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `SMTP_*`: supaya kode OTP benar-benar terkirim ke email. Tanpa ini, isi email dicetak di terminal.
+- `DATABASE_URL`: kalau ingin memakai database online.
+- `RAHASIA_APLIKASI`: wajib diisi saat website di-deploy.
 
-## Learn More
+Untuk mengulang data contoh dari awal, matikan server, hapus folder `.data`, lalu jalankan `npm run dev` lagi.
 
-To learn more about Next.js, take a look at the following resources:
+## Akun Demo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Semua kata sandi: `demo1234`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Peran | Email |
+|---|---|
+| Warga | warga@demo.id |
+| Petugas DPU Jakarta Selatan | petugas.dpu@demo.id |
+| Petugas Dishub Jakarta Selatan | petugas.dishub@demo.id |
+| Petugas SDA Jakarta Selatan | petugas.sda@demo.id |
+| Admin verifikator | admin@demo.id |
 
-## Deploy on Vercel
+Akun warga baru bisa dibuat sendiri lewat halaman Daftar (verifikasi kode OTP email).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Progress
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [x] Beranda: lacak nomor laporan, kinerja layanan, daerah terbanyak, laporan terbaru
+- [x] Jelajah laporan: filter kota/kabupaten, kecamatan, kelompok masalah, status, laporan di sekitar pengguna
+- [x] Detail laporan: tahap, tenggat, riwayat penanganan, foto sebelum/sesudah, dukungan, konfirmasi warga
+- [x] Buat laporan 6 langkah: peta lokasi, daerah otomatis, cek laporan serupa, foto dengan data EXIF, privasi
+- [x] Akun: daftar dengan OTP email, masuk, lupa kata sandi, kunci akun setelah 5 kali gagal
+- [x] Riwayat, notifikasi, dan pengaturan akun warga
+- [x] Transparansi: rapor instansi per daerah dan standar waktu layanan
+- [x] Dasbor petugas: antrean instansi, terima, kirim kabar, perpanjangan, alihkan, tandai selesai dengan foto
+- [x] Dasbor admin: verifikasi dengan tanda risiko, tolak, pemantauan tenggat, teguran, akun petugas
+- [x] Tugas otomatis: tutup laporan tanpa konfirmasi 10 hari, eskalasi laporan lewat batas waktu
+- [ ] Deploy online (Vercel + Neon)
+- [ ] Foto asli untuk laporan contoh
+
+Data laporan dan kinerja instansi di website ini adalah data simulasi untuk keperluan lomba.
