@@ -18,6 +18,34 @@
   --color-bahaya-muda: #fbe9e7;
 }
 
+/* Animasi kecil. Dipakai dengan awalan motion-safe: supaya mati
+   kalau pengguna memilih kurangi gerakan di pengaturan perangkat. */
+@theme {
+  --animate-muncul: muncul 0.22s ease-out;
+  --animate-toast: toast-masuk 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-cap: cap 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-letup: letup 0.35s ease-out;
+
+  @keyframes muncul {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes toast-masuk {
+    from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes cap {
+    0% { opacity: 0; transform: scale(1.6) rotate(-14deg); }
+    70% { opacity: 1; transform: scale(0.94) rotate(-5deg); }
+    100% { opacity: 1; transform: scale(1) rotate(-6deg); }
+  }
+  @keyframes letup {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+}
+
 @theme inline {
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }
@@ -29,6 +57,10 @@ html {
 body {
   background: var(--color-kertas);
   color: var(--color-tinta);
+}
+
+dialog::backdrop {
+  background: rgb(19 35 61 / 0.45);
 }
 
 :focus-visible {
