@@ -1,5 +1,6 @@
 import { ImageIcon } from "lucide-react";
-import type { FotoLaporan } from "@/lib/types";
+import type { FotoLaporan, KategoriId } from "@/lib/types";
+import { KategoriIkon } from "@/components/kategori-ikon";
 import { formatTanggalJam } from "@/lib/waktu";
 
 // Foto asli dari database, atau tempat foto untuk data contoh
@@ -7,10 +8,12 @@ export function FotoLaporanTampil({
   foto,
   contoh,
   label,
+  kategoriId,
 }: {
   foto: FotoLaporan[];
   contoh: boolean;
   label: string;
+  kategoriId?: KategoriId;
 }) {
   if (foto.length > 0) {
     return (
@@ -31,12 +34,13 @@ export function FotoLaporanTampil({
   return (
     <figure>
       <div
-        className="flex aspect-[4/3] items-center justify-center rounded-xl border border-garis text-tinta-redup"
-        style={{ backgroundImage: contoh ? "repeating-linear-gradient(135deg, var(--color-kertas) 0 12px, white 12px 24px)" : undefined }}
+        className={`flex aspect-[4/3] items-center justify-center rounded-xl border border-garis ${
+          contoh ? "bg-gradient-to-br from-rambu-muda via-white to-kertas text-rambu/70" : "bg-kertas text-tinta-redup"
+        }`}
       >
         <span className="flex flex-col items-center gap-2 px-4 text-center text-sm">
-          <ImageIcon className="size-6" aria-hidden="true" />
-          {contoh ? "Foto contoh (data simulasi)" : "Tidak ada foto"}
+          {contoh && kategoriId ? <KategoriIkon id={kategoriId} className="size-12" /> : <ImageIcon className="size-6" aria-hidden="true" />}
+          <span className="text-tinta-redup">{contoh ? "Ilustrasi (data simulasi)" : "Tidak ada foto"}</span>
         </span>
       </div>
       <figcaption className="mt-2 text-sm text-tinta-redup">{label}</figcaption>

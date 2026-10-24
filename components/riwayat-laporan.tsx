@@ -28,6 +28,7 @@ const tampilan: Record<JenisKejadian, { judul: string; ikon: LucideIcon; nada: N
   dialihkan: { judul: "Dialihkan ke instansi lain", ikon: ArrowRightLeft, nada: "waspada" },
   diproses: { judul: "Mulai dikerjakan", ikon: Timer, nada: "rambu" },
   balasan: { judul: "Kabar dari petugas", ikon: MessageSquare, nada: "netral" },
+  tanggapan: { judul: "Tanggapan warga", ikon: MessageSquare, nada: "netral" },
   perpanjangan: { judul: "Perpanjangan waktu", ikon: CalendarClock, nada: "waspada" },
   eskalasi: { judul: "Dieskalasi ke pengawas", ikon: Siren, nada: "bahaya" },
   ditandai_selesai: { judul: "Ditandai selesai oleh petugas", ikon: CircleCheck, nada: "rambu" },
@@ -55,7 +56,8 @@ export function RiwayatLaporan({
   tenggat: Tenggat | null;
   namaPelapor: string;
 }) {
-  const kejadian = [...laporan.riwayat].reverse();
+  // Pesan petugas dan warga tampil di bagian Percakapan, bukan di sini
+  const kejadian = [...laporan.riwayat].filter((k) => k.jenis !== "balasan" && k.jenis !== "tanggapan").reverse();
 
   return (
     <ol className="relative">
@@ -92,7 +94,9 @@ export function RiwayatLaporan({
               <Ikon className="size-4" aria-hidden="true" />
             </span>
             <div className="min-w-0 pt-1.5">
-              <p className="font-semibold">{info.judul}</p>
+              <p className="font-semibold">
+                {k.jenis === "eskalasi" && k.aktor !== "Sistem" ? "Teguran dari admin pengawas" : k.jenis === "eskalasi" ? "Dieskalasi otomatis ke pengawas" : info.judul}
+              </p>
               <p className="angka mt-0.5 text-sm text-tinta-redup">
                 {formatTanggalJam(k.waktu)} oleh {aktor}
               </p>

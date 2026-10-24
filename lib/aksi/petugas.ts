@@ -40,14 +40,15 @@ export async function terimaLaporan(nomor: string, catatan: string): Promise<Has
 }
 
 export async function kirimBalasan(nomor: string, catatan: string): Promise<HasilAksi> {
-  const siap = await siapkan(nomor, ["diteruskan", "diproses"]);
+  const siap = await siapkan(nomor, ["diteruskan", "diproses", "menunggu_konfirmasi"]);
   if ("ok" in siap) return siap;
-  if (catatan.trim().length < 5) return gagal("Tulis kabar minimal 5 karakter.");
+  if (catatan.trim().length < 2) return gagal("Pesan masih kosong.");
+  if (catatan.trim().length > 1000) return gagal("Pesan maksimal 1000 karakter.");
   await transaksi(async (k) => {
     await k("INSERT INTO kejadian (nomor, jenis, aktor, aktor_id, catatan) VALUES ($1, 'balasan', $2, $3, $4)", [
       nomor, siap.instansi.nama, siap.pengguna.id, catatan.trim(),
     ]);
-    await beritahu(k, nomor, { judul: "Kabar baru dari petugas", isi: catatan.trim().slice(0, 140) }, { warga: true });
+    await beritahu(k, nomor, { judul: `Pesan dari ${siap.instansi.singkatan}`, isi: catatan.trim().slice(0, 140) }, { warga: true });
   });
   refresh();
   return { ok: true };

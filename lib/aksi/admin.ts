@@ -66,7 +66,11 @@ export async function tegurInstansi(nomor: string, catatan: string): Promise<Has
   const siap = await siapkanAdmin(nomor);
   if ("ok" in siap) return siap;
   if (!apakahTerlambat(siap.laporan)) return gagal("Laporan ini belum melewati batas waktu.");
-  if (catatan.trim().length < 5) return gagal("Tulis catatan teguran.");
+  if (catatan.trim().length < 5) return gagal("Tulis isi teguran minimal 5 karakter.");
+  const teguranTerakhir = siap.laporan.riwayat.findLast((k) => k.jenis === "eskalasi" && k.aktor === "Admin pengawas");
+  if (teguranTerakhir && Date.now() - new Date(teguranTerakhir.waktu).getTime() < 24 * 60 * 60 * 1000) {
+    return gagal("Instansi sudah ditegur dalam 24 jam terakhir. Beri waktu untuk merespons.");
+  }
   await transaksi(async (k) => {
     await k("INSERT INTO kejadian (nomor, jenis, aktor, aktor_id, catatan) VALUES ($1, 'eskalasi', 'Admin pengawas', $2, $3)", [
       nomor, siap.admin.id, catatan.trim(),
@@ -103,6 +107,34 @@ export async function buatAkunPetugas(data: {
     "INSERT INTO pengguna (nama, email, hp, hash_sandi, peran, instansi_id) VALUES ($1, $2, $3, $4, 'petugas', $5)",
     [data.nama.trim(), email, hp, await hashSandi(data.sandi), data.instansiId],
   );
+  refresh();
+  return { ok: true };
+}
+
+// ---------------- laporan yang ditandai warga ----------------
+
+export async function abaikanTanda(nomor: string): Promise<HasilAksi> {
+  const siap = await siapkanAdmin(nomor);
+  if ("ok" in siap) return siap;
+  await kueri("DELETE FROM tanda_tidak_sesuai WHERE nomor = $1", [nomor]);
+  refresh();
+  return { ok: true };
+}
+
+export async function tutupTidakValid(nomor: string, alasan: string): Promise<HasilAksi> {
+  const siap = await siapkanAdmin(nomor);
+  if ("ok" in siap) return siap;
+  if (!["terkirim", "diteruskan", "diproses", "menunggu_konfirmasi"].includes(hitungStatus(siap.laporan))) {
+    return gagal("Laporan ini sudah ditutup.");
+  }
+  if (alasan.trim().length < 10) return gagal("Tulis alasan minimal 10 karakter. Alasan ditampilkan ke publik.");
+  await transaksi(async (k) => {
+    await k("INSERT INTO kejadian (nomor, jenis, aktor, aktor_id, catatan) VALUES ($1, 'ditolak', 'Admin verifikator', $2, $3)", [
+      nomor, siap.admin.id, `Ditutup karena tidak valid: ${alasan.trim()}`,
+    ]);
+    await k("DELETE FROM tanda_tidak_sesuai WHERE nomor = $1", [nomor]);
+    await beritahu(k, nomor, { judul: "Laporan ditutup admin", isi: alasan.trim().slice(0, 140) }, { warga: true, petugas: true });
+  });
   refresh();
   return { ok: true };
 }

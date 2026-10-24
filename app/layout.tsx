@@ -15,7 +15,10 @@ export const metadata: Metadata = {
     template: `%s | ${situs.nama}`,
   },
   description: situs.deskripsi,
+  applicationName: situs.nama,
 };
+
+export const viewport = { themeColor: "#1f4fa8" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { Plus } from "lucide-react";
-import { ambilSemuaLaporan, laporanPublik, ringkas } from "@/lib/server/laporan";
+import { aktivitasTerkini, ambilSemuaLaporan, laporanPublik, ringkas } from "@/lib/server/laporan";
+import { AktivitasTerkini } from "@/components/aktivitas-terkini";
+import { AngkaNaik } from "@/components/angka-naik";
 import { raporInstansi, ringkasanBeranda, wilayahTerbanyak } from "@/lib/statistik";
 import { hitungStatus } from "@/lib/sla";
 import { situs } from "@/lib/site";
@@ -47,6 +49,11 @@ export default function Beranda() {
               Jelajah laporan warga
             </Link>
           </div>
+          <div className="mt-8 max-w-xl">
+            <Suspense fallback={<div className="h-12 rounded-xl border border-garis bg-white" />}>
+              <KabarTerbaru />
+            </Suspense>
+          </div>
         </div>
         <Suspense fallback={<div className="h-[26rem] animate-pulse rounded-2xl border border-garis bg-white motion-reduce:animate-none" />}>
           <ResiSorotan />
@@ -83,6 +90,11 @@ async function LacakDenganContoh() {
   return <LacakForm contoh={sorotan?.nomor ?? `${situs.kodeLaporan}-0000-0000`} />;
 }
 
+async function KabarTerbaru() {
+  await connection();
+  return <AktivitasTerkini daftar={aktivitasTerkini(await ambilSemuaLaporan())} />;
+}
+
 async function ResiSorotan() {
   await connection();
   const publik = laporanPublik(await ambilSemuaLaporan());
@@ -115,21 +127,21 @@ async function BagianData() {
             <h2 className="text-xl font-bold">Kinerja layanan</h2>
             <p className="mt-1 text-sm text-tinta-redup">Dihitung otomatis dari semua laporan, setiap kali halaman dibuka.</p>
             <dl className="mt-6 divide-y divide-garis border-y border-garis">
-              <BarisKinerja label="Laporan masuk" keterangan="Dalam 30 hari terakhir" nilai={String(kinerja.masuk30Hari)} />
+              <BarisKinerja label="Laporan masuk" keterangan="Dalam 30 hari terakhir" nilai={<AngkaNaik nilai={kinerja.masuk30Hari} />} />
               <BarisKinerja
                 label="Dikonfirmasi beres oleh warga"
                 keterangan="Dari semua laporan yang sudah ditutup"
-                nilai={kinerja.persenDikonfirmasi === null ? "–" : `${kinerja.persenDikonfirmasi}%`}
+                nilai={kinerja.persenDikonfirmasi === null ? "–" : <AngkaNaik nilai={kinerja.persenDikonfirmasi} akhiran="%" />}
               />
               <BarisKinerja
                 label="Rata-rata sampai selesai dikerjakan"
                 keterangan="Sejak laporan dibuat"
-                nilai={kinerja.rataHariSelesai === null ? "–" : `${Math.round(kinerja.rataHariSelesai)} hari`}
+                nilai={kinerja.rataHariSelesai === null ? "–" : <AngkaNaik nilai={Math.round(kinerja.rataHariSelesai)} akhiran=" hari" />}
               />
               <BarisKinerja
                 label="Sedang melewati batas waktu"
                 keterangan="Sudah dieskalasi ke pengawas"
-                nilai={String(kinerja.terlambatSekarang)}
+                nilai={<AngkaNaik nilai={kinerja.terlambatSekarang} />}
                 bahaya={kinerja.terlambatSekarang > 0}
               />
             </dl>
@@ -206,7 +218,7 @@ function DaftarInstansi({ judul, baris, warna }: { judul: string; baris: string[
   );
 }
 
-function BarisKinerja({ label, keterangan, nilai, bahaya = false }: { label: string; keterangan: string; nilai: string; bahaya?: boolean }) {
+function BarisKinerja({ label, keterangan, nilai, bahaya = false }: { label: string; keterangan: string; nilai: React.ReactNode; bahaya?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-6 py-4">
       <dt>

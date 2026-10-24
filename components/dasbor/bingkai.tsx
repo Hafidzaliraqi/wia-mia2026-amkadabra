@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ClipboardCheck, ExternalLink, Inbox, LogOut, Menu, Siren, Users, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Dialog, Tombol } from "@/components/dialog";
-import { inisial, useKeluar } from "@/components/navigasi";
+import { inisial, LoncengNotifikasi, useKeluar, type DataNotifikasi } from "@/components/navigasi";
 
 const menu = {
   petugas: [{ href: "/petugas", label: "Laporan instansi", ikon: Inbox }],
@@ -21,11 +21,13 @@ export function BingkaiDasbor({
   peran,
   nama,
   keterangan,
+  notifikasi,
   children,
 }: {
   peran: "petugas" | "admin";
   nama: string;
   keterangan: string;
+  notifikasi: DataNotifikasi;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -74,14 +76,17 @@ export function BingkaiDasbor({
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[260px_1fr]">
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-garis bg-white p-4 lg:flex">
-        <div className="mb-6 px-1">
+        <div className="mb-6 flex items-center justify-between px-1">
           <Logo />
+          <LoncengNotifikasi data={notifikasi} rataKiri />
         </div>
         {isiSamping}
       </aside>
 
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-garis bg-white px-4 lg:hidden">
         <Logo />
+        <div className="flex items-center gap-1">
+        <LoncengNotifikasi data={notifikasi} />
         <button
           type="button"
           onClick={() => setMenuTerbuka((v) => !v)}
@@ -92,6 +97,7 @@ export function BingkaiDasbor({
           {menuTerbuka ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
           <span className="sr-only">Menu</span>
         </button>
+        </div>
       </header>
       {menuTerbuka && (
         <div id="menu-dasbor-hp" className="flex flex-col border-b border-garis bg-white p-4 motion-safe:animate-muncul lg:hidden">

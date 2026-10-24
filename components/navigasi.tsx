@@ -111,7 +111,10 @@ export function NavAtasTampilan({
         <Logo />
 
         <nav aria-label="Menu utama" className="hidden items-center gap-1 lg:flex">
-          {menuAtas.map((item) => {
+          {(pengguna && pengguna.peran !== "warga"
+            ? [...menuAtas.slice(0, 3), { href: `/${pengguna.peran}`, label: "Dasbor" }]
+            : menuAtas
+          ).map((item) => {
             const aktif = cocok(pathname, item.href);
             return (
               <Link
@@ -260,7 +263,7 @@ function PanelCari({ onTutup }: { onTutup: () => void }) {
   );
 }
 
-function LoncengNotifikasi({ data }: { data: DataNotifikasi }) {
+export function LoncengNotifikasi({ data, rataKiri = false }: { data: DataNotifikasi; rataKiri?: boolean }) {
   const router = useRouter();
   const [terbuka, setTerbuka] = useState(false);
   const tutup = useCallback(() => setTerbuka(false), []);
@@ -288,7 +291,7 @@ function LoncengNotifikasi({ data }: { data: DataNotifikasi }) {
       {terbuka && (
         <div
           id="panel-notifikasi"
-          className="absolute top-full right-0 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-garis bg-white shadow-lg motion-safe:animate-muncul"
+          className={`absolute top-full z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-garis bg-white shadow-lg motion-safe:animate-muncul ${rataKiri ? "left-0" : "right-0"}`}
         >
           <div className="flex items-center justify-between border-b border-garis px-4 py-3">
             <p className="font-semibold">Notifikasi</p>
@@ -449,17 +452,27 @@ function MenuAkun({ pengguna }: { pengguna: PenggunaRingkas }) {
   );
 }
 
-export function NavBawahTampilan({ pathname }: { pathname: string | null }) {
+export function NavBawahTampilan({ pathname, peran = null }: { pathname: string | null; peran?: string | null }) {
+  const staf = peran === "petugas" || peran === "admin";
+  const menu = staf
+    ? [
+        { href: "/", label: "Beranda", ikon: House },
+        { href: "/laporan", label: "Jelajah", ikon: Compass },
+        { href: `/${peran}`, label: "Dasbor", ikon: LayoutDashboard },
+        { href: "/transparansi", label: "Rapor", ikon: ChartColumn },
+        { href: "/akun", label: "Akun", ikon: UserRound },
+      ]
+    : menuBawah;
   return (
     <nav
       aria-label="Menu bawah"
       className="fixed inset-x-0 bottom-0 z-30 border-t border-garis bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       <ul className="mx-auto grid h-16 max-w-md grid-cols-5">
-        {menuBawah.map((item) => {
+        {menu.map((item) => {
           const aktif = cocok(pathname, item.href);
           const Ikon = item.ikon;
-          const tengah = item.href === "/lapor";
+          const tengah = item.href === "/lapor" || (staf && item.label === "Dasbor");
           return (
             <li key={item.href} className="flex">
               <Link
@@ -490,6 +503,6 @@ export function NavAtas(props: { pengguna: PenggunaRingkas | null; notifikasi: D
   return <NavAtasTampilan pathname={usePathname()} {...props} />;
 }
 
-export function NavBawah() {
-  return <NavBawahTampilan pathname={usePathname()} />;
+export function NavBawah({ peran = null }: { peran?: string | null }) {
+  return <NavBawahTampilan pathname={usePathname()} peran={peran} />;
 }

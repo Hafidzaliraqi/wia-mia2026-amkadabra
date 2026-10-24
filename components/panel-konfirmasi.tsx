@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { bukaUlangLaporan, konfirmasiPenyelesaian } from "@/lib/aksi/laporan";
 import { Tombol } from "@/components/dialog";
 import { useToast } from "@/components/toast";
+import { rayakan } from "@/lib/rayakan";
 
 export function PanelKonfirmasi({
   nomor,
@@ -28,6 +29,7 @@ export function PanelKonfirmasi({
     mulai(async () => {
       const r = await konfirmasiPenyelesaian(nomor, hasil, alasan);
       if (!r.ok) return toast("galat", r.pesan);
+      if (hasil === "beres") rayakan();
       toast(
         "sukses",
         hasil === "beres" ? "Terima kasih! Laporan tercatat selesai." : "Laporan dibuka ulang dan dikembalikan ke petugas.",
