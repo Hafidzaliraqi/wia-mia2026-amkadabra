@@ -65,7 +65,7 @@ export function DetailLaporanDasbor({
             </p>
             <p className="mt-4 max-w-prose leading-relaxed whitespace-pre-line">{laporan.deskripsi}</p>
             <div className="mt-6 grid gap-6 sm:grid-cols-2">
-              <FotoLaporanTampil foto={fotoAwal} contoh={laporan.adaFotoContoh} label="Foto dari pelapor" />
+              <FotoLaporanTampil foto={fotoAwal} kategoriId={laporan.kategoriId} contoh={laporan.adaFotoContoh} label="Foto dari pelapor" />
               <div className="text-sm">
                 <h3 className="font-semibold">Lokasi</h3>
                 <p className="mt-1 flex gap-2 leading-relaxed">

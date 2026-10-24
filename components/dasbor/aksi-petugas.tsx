@@ -6,7 +6,7 @@ import type { StatusLaporan } from "@/lib/types";
 import { Tombol } from "@/components/dialog";
 import { useToast } from "@/components/toast";
 import { siapkanFoto, type FotoSiap } from "@/lib/foto-klien";
-import { alihkanLaporan, kirimBalasan, mintaPerpanjangan, tandaiSelesai, terimaLaporan } from "@/lib/aksi/petugas";
+import { alihkanLaporan, mintaPerpanjangan, tandaiSelesai, terimaLaporan } from "@/lib/aksi/petugas";
 
 const kelasIsian = "w-full rounded-xl border border-garis bg-white px-3.5 py-2.5 text-sm focus:border-rambu focus:outline-none";
 
@@ -35,7 +35,6 @@ export function PanelPetugas({
   const [memproses, mulai] = useTransition();
   const [aksiAktif, setAksiAktif] = useState<string | null>(null);
   const [catatanTerima, setCatatanTerima] = useState("");
-  const [kabar, setKabar] = useState("");
   const [catatanSelesai, setCatatanSelesai] = useState("");
   const [foto, setFoto] = useState<FotoSiap[]>([]);
   const [hari, setHari] = useState(7);
@@ -79,7 +78,7 @@ export function PanelPetugas({
             className="w-full"
             memproses={memproses && aksiAktif === "terima"}
             disabled={memproses}
-            onClick={() => jalankan("terima", () => terimaLaporan(nomor, catatanTerima), "Laporan diterima. Warga sudah diberi tahu.")}
+            onClick={() => jalankan("terima", () => terimaLaporan(nomor, catatanTerima), "Laporan diterima. Warga sudah diberi tahu.", () => setCatatanTerima(""))}
           >
             Terima dan mulai kerjakan
           </Tombol>
@@ -134,7 +133,10 @@ export function PanelPetugas({
               data.set("nomor", nomor);
               data.set("catatan", catatanSelesai);
               foto.forEach((f) => data.append("foto", f.berkas));
-              jalankan("selesai", () => tandaiSelesai(data), "Ditandai selesai. Warga diminta mengonfirmasi.");
+              jalankan("selesai", () => tandaiSelesai(data), "Ditandai selesai. Warga diminta mengonfirmasi.", () => {
+                setCatatanSelesai("");
+                setFoto([]);
+              });
             }}
           >
             <CircleCheck className="size-4" aria-hidden="true" />
@@ -142,19 +144,6 @@ export function PanelPetugas({
           </Tombol>
         </Kartu>
       )}
-
-      <Kartu judul="Kirim kabar ke warga" isi="Kabar tampil di riwayat laporan dan dikirim ke pelapor serta pendukung.">
-        <textarea rows={3} value={kabar} onChange={(e) => setKabar(e.target.value)} placeholder="Contoh: Material sudah datang, pengerjaan dimulai besok pagi." className={kelasIsian} aria-label="Isi kabar" />
-        <Tombol
-          varian="garis"
-          className="w-full"
-          memproses={memproses && aksiAktif === "kabar"}
-          disabled={memproses}
-          onClick={() => jalankan("kabar", () => kirimBalasan(nomor, kabar), "Kabar terkirim ke warga.", () => setKabar(""))}
-        >
-          Kirim kabar
-        </Tombol>
-      </Kartu>
 
       {status === "diproses" && bisaPerpanjang && (
         <Kartu judul="Minta perpanjangan" isi="Hanya sekali per putaran pengerjaan. Alasan ditampilkan ke publik.">
@@ -172,7 +161,7 @@ export function PanelPetugas({
             className="w-full ring-1 ring-garis ring-inset"
             memproses={memproses && aksiAktif === "perpanjang"}
             disabled={memproses}
-            onClick={() => jalankan("perpanjang", () => mintaPerpanjangan(nomor, hari, alasanPerpanjang), "Batas waktu diperpanjang.")}
+            onClick={() => jalankan("perpanjang", () => mintaPerpanjangan(nomor, hari, alasanPerpanjang), "Batas waktu diperpanjang.", () => setAlasanPerpanjang(""))}
           >
             Perpanjang batas waktu
           </Tombol>
@@ -197,7 +186,10 @@ export function PanelPetugas({
             className="w-full"
             memproses={memproses && aksiAktif === "alih"}
             disabled={memproses}
-            onClick={() => jalankan("alih", () => alihkanLaporan(nomor, tujuan, alasanAlih), "Laporan dialihkan.")}
+            onClick={() => jalankan("alih", () => alihkanLaporan(nomor, tujuan, alasanAlih), "Laporan dialihkan ke instansi tujuan.", () => {
+              setAlasanAlih("");
+              setTujuan("");
+            })}
           >
             Alihkan laporan
           </Tombol>

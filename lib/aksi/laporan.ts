@@ -52,6 +52,13 @@ export async function buatLaporan(form: FormData): Promise<HasilAksi<{ nomor: st
   }
   if (!["publik", "sembunyikan_nama", "privat"].includes(visibilitas)) return gagal("Pilih siapa yang boleh melihat laporan.");
 
+  // Batas wajar supaya tidak ada banjir laporan dari satu akun
+  const [{ jumlah }] = await kueri<{ jumlah: number }>(
+    "SELECT count(*)::int AS jumlah FROM laporan WHERE pelapor_id = $1 AND dibuat_pada > now() - interval '1 hour'",
+    [pengguna.id],
+  );
+  if (jumlah >= 5) return gagal("Kamu sudah mengirim 5 laporan dalam 1 jam terakhir. Coba lagi nanti.");
+
   const berkas = form.getAll("foto").filter((f): f is File => f instanceof File && f.size > 0);
   if (berkas.length > MAKS_FOTO) return gagal(`Maksimal ${MAKS_FOTO} foto.`);
   for (const f of berkas) {
@@ -204,5 +211,28 @@ export async function tandaiTidakSesuai(nomor: string, alasan: string): Promise<
     "INSERT INTO tanda_tidak_sesuai (pengguna_id, nomor, alasan) VALUES ($1, $2, $3) ON CONFLICT (pengguna_id, nomor) DO UPDATE SET alasan = $3",
     [pengguna.id, nomor, alasan.trim().slice(0, 300)],
   );
+  return { ok: true };
+}
+
+// ---------------- percakapan dengan petugas ----------------
+
+export async function kirimTanggapan(nomor: string, isi: string): Promise<HasilAksi> {
+  const pengguna = await wajibMasuk(["warga"]);
+  if ("ok" in pengguna) return pengguna;
+  if (!nomorValid(nomor)) return gagal("Laporan tidak ditemukan.");
+  const pesan = isi.trim();
+  if (pesan.length < 2) return gagal("Pesan masih kosong.");
+  if (pesan.length > 1000) return gagal("Pesan maksimal 1000 karakter.");
+  const laporan = await ambilLaporan(nomor);
+  if (!laporan) return gagal("Laporan tidak ditemukan.");
+  if (!STATUS_AKTIF.includes(hitungStatus(laporan))) return gagal("Percakapan sudah ditutup karena laporan selesai.");
+  const aktor = await pihakBerhak(nomor, pengguna.id, laporan.pelaporId);
+  if (!aktor) return gagal("Hanya pelapor dan warga pendukung yang bisa mengirim pesan. Dukung laporan ini dulu.");
+
+  await transaksi(async (k) => {
+    await k("INSERT INTO kejadian (nomor, jenis, aktor, aktor_id, catatan) VALUES ($1, 'tanggapan', $2, $3, $4)", [nomor, aktor, pengguna.id, pesan]);
+    await beritahu(k, nomor, { judul: `Pesan baru dari ${aktor.toLowerCase()}`, isi: pesan.slice(0, 140) }, { warga: true, petugas: true, kecuali: pengguna.id });
+  });
+  refresh();
   return { ok: true };
 }

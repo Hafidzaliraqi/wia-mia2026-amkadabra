@@ -12,6 +12,10 @@ import { namaKota } from "@/lib/wilayah";
 import { normalisasiNomor } from "@/lib/nomor";
 import { HARI, formatHariTanggalJam, formatTanggal, formatTanggalJam, sekarang, tambahHari } from "@/lib/waktu";
 import { AksiWarga } from "@/components/aksi-warga";
+import { Percakapan } from "@/components/percakapan";
+import { PenyegarOtomatis } from "@/components/penyegar-otomatis";
+import { TombolBagikan } from "@/components/tombol-bagikan";
+import { susunPercakapan } from "@/lib/server/percakapan";
 import { FotoLaporanTampil } from "@/components/foto-contoh";
 import { KategoriIkon } from "@/components/kategori-ikon";
 import { LangkahStatus } from "@/components/langkah-status";
@@ -193,7 +197,7 @@ async function IsiDetail({ params }: Pick<PageProps<"/laporan/[id]">, "params">)
             </p>
             <p className="mt-4 max-w-prose leading-relaxed whitespace-pre-line">{laporan.deskripsi}</p>
             <div className="mt-6 grid gap-6 sm:grid-cols-2">
-              <FotoLaporanTampil foto={fotoAwal} contoh={laporan.adaFotoContoh} label="Foto dari pelapor" />
+              <FotoLaporanTampil foto={fotoAwal} kategoriId={laporan.kategoriId} contoh={laporan.adaFotoContoh} label="Foto dari pelapor" />
               <div>
                 <h3 className="text-sm font-semibold">Lokasi</h3>
                 <p className="mt-1 flex gap-2 text-sm leading-relaxed">
@@ -228,18 +232,37 @@ async function IsiDetail({ params }: Pick<PageProps<"/laporan/[id]">, "params">)
                 Petugas wajib melampirkan foto sesudah pekerjaan sebelum menandai laporan selesai.
               </p>
               <div className="mt-5 grid gap-6 sm:grid-cols-2">
-                <FotoLaporanTampil foto={fotoAwal} contoh={laporan.adaFotoContoh} label="Sebelum, dari pelapor" />
+                <FotoLaporanTampil foto={fotoAwal} kategoriId={laporan.kategoriId} contoh={laporan.adaFotoContoh} label="Sebelum, dari pelapor" />
                 <FotoLaporanTampil
                   foto={fotoSesudah}
-                  contoh={fotoSesudah.length === 0}
+                  kategoriId={laporan.kategoriId} contoh={fotoSesudah.length === 0}
                   label={`Sesudah, dari ${ditandaiSelesai.aktor}, ${formatTanggal(ditandaiSelesai.waktu)}`}
                 />
               </div>
             </section>
           )}
 
+          <Percakapan
+            nomor={laporan.nomor}
+            pesan={susunPercakapan(laporan, pengguna?.id ?? null, "warga")}
+            sebagai="warga"
+            bisaKirim={pengguna?.peran === "warga" && berhak && masihBerjalan}
+            keteranganTutup={
+              !masihBerjalan
+                ? "Percakapan ditutup karena laporan sudah selesai."
+                : !pengguna
+                  ? "Masuk sebagai pelapor atau pendukung untuk ikut berdiskusi dengan petugas."
+                  : pengguna.peran !== "warga"
+                    ? "Petugas membalas lewat dasbor."
+                    : "Dukung laporan ini untuk ikut berdiskusi dengan petugas."
+            }
+          />
+
           <section className="rounded-2xl border border-garis bg-white p-5 sm:p-6">
-            <h2 className="font-bold">Riwayat penanganan</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-bold">Riwayat penanganan</h2>
+              {masihBerjalan && <PenyegarOtomatis />}
+            </div>
             <p className="mt-1 text-sm text-tinta-redup">Setiap perubahan tercatat permanen dan bisa dilihat semua orang.</p>
             <div className="mt-6">
               <RiwayatLaporan laporan={laporan} tenggat={tenggat} namaPelapor={namaPelapor} />
@@ -256,6 +279,7 @@ async function IsiDetail({ params }: Pick<PageProps<"/laporan/[id]">, "params">)
               mulai dikerjakan.
             </p>
           </section>
+          <TombolBagikan nomor={laporan.nomor} judul={laporan.judul} />
           <section className="rounded-2xl border border-garis bg-white p-5">
             <h2 className="sr-only">Dukungan warga</h2>
             <AksiWarga

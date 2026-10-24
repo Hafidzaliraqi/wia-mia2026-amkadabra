@@ -50,15 +50,18 @@ Akun warga baru bisa dibuat sendiri lewat halaman Daftar (verifikasi kode OTP em
 
 - [x] Beranda: lacak nomor laporan, kinerja layanan, daerah terbanyak, laporan terbaru
 - [x] Jelajah laporan: filter kota/kabupaten, kecamatan, kelompok masalah, status, laporan di sekitar pengguna
-- [x] Detail laporan: tahap, tenggat, riwayat penanganan, foto sebelum/sesudah, dukungan, konfirmasi warga
-- [x] Buat laporan 6 langkah: peta lokasi, daerah otomatis, cek laporan serupa, foto dengan data EXIF, privasi
+- [x] Detail laporan: tahap, hitung mundur tenggat, riwayat penanganan, foto sebelum/sesudah, dukungan, bagikan, konfirmasi warga
+- [x] Percakapan dua arah petugas dan warga, halaman diperbarui otomatis tanpa muat ulang
+- [x] Buat laporan 6 langkah: peta lokasi, daerah terdeteksi dari alamat peta, cek laporan serupa, foto dengan data EXIF, privasi
 - [x] Akun: daftar dengan OTP email, masuk, lupa kata sandi, kunci akun setelah 5 kali gagal
 - [x] Riwayat, notifikasi, dan pengaturan akun warga
-- [x] Transparansi: rapor instansi per daerah dan standar waktu layanan
+- [x] Transparansi: peta sebaran laporan, rapor instansi per daerah, dan standar waktu layanan
 - [x] Dasbor petugas: antrean instansi, terima, kirim kabar, perpanjangan, alihkan, tandai selesai dengan foto
-- [x] Dasbor admin: verifikasi dengan tanda risiko, tolak, pemantauan tenggat, teguran, akun petugas
+- [x] Dasbor admin: verifikasi dengan tanda risiko, tolak, tindak lanjut laporan yang ditandai warga, pemantauan tenggat, teguran, akun petugas
 - [x] Tugas otomatis: tutup laporan tanpa konfirmasi 10 hari, eskalasi laporan lewat batas waktu
 - [ ] Deploy online (Vercel + Neon)
 - [ ] Foto asli untuk laporan contoh
+
+Wilayah layanan: seluruh DKI Jakarta, Kota/Kabupaten Bogor, Kota Depok, Kota Bandung, dan Kabupaten Garut.
 
 Data laporan dan kinerja instansi di website ini adalah data simulasi untuk keperluan lomba.

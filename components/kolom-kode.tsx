@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { MailCheck, Terminal } from "lucide-react";
-import { KolomIsian } from "@/components/kolom-isian";
+import { KotakKode } from "@/components/kotak-kode";
 import { Tombol } from "@/components/dialog";
 import { useToast } from "@/components/toast";
 import { kirimUlangKode } from "@/lib/aksi/akun";
@@ -14,6 +14,7 @@ export function KolomKode({
   modeTerminal,
   kode,
   onUbah,
+  onLengkap,
   galat,
 }: {
   idOtp: string;
@@ -21,6 +22,7 @@ export function KolomKode({
   modeTerminal: boolean;
   kode: string;
   onUbah: (kode: string) => void;
+  onLengkap?: (kode: string) => void;
   galat?: string | null;
 }) {
   const toast = useToast();
@@ -49,17 +51,15 @@ export function KolomKode({
           </span>
         </p>
       )}
-      <KolomIsian
-        label="Kode verifikasi"
-        name="kode"
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        maxLength={6}
-        value={kode}
-        onChange={(e) => onUbah(e.target.value.replace(/\D/g, ""))}
-        galat={galat}
-        className="angka text-xl tracking-[0.4em]"
-      />
+      <div>
+        <p className="mb-2 text-sm font-semibold">Kode verifikasi</p>
+        <KotakKode nilai={kode} onUbah={onUbah} onLengkap={onLengkap} galat={Boolean(galat)} idGalat="galat-kode" />
+        {galat && (
+          <p id="galat-kode" role="alert" className="mt-2 text-sm text-bahaya motion-safe:animate-muncul">
+            {galat}
+          </p>
+        )}
+      </div>
       <div className="text-sm">
         {jeda > 0 ? (
           <span className="angka text-tinta-redup">Kirim ulang kode dalam {jeda} detik</span>

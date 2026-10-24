@@ -6,13 +6,17 @@ import { hitungRisiko } from "@/lib/server/risiko";
 import { keItemKerja } from "@/lib/server/kerja";
 import { apakahTerlambat, hitungStatus } from "@/lib/sla";
 import { DaftarKerja, KartuRingkas } from "@/components/dasbor/daftar-kerja";
+import { PenyegarOtomatis } from "@/components/penyegar-otomatis";
 
 export const metadata: Metadata = { title: "Dasbor admin" };
 
 export default function HalamanAdmin() {
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="text-2xl font-extrabold tracking-tight">Antrean verifikasi</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-extrabold tracking-tight">Antrean verifikasi</h1>
+        <PenyegarOtomatis detik={20} />
+      </div>
       <p className="mt-1 text-tinta-redup">
         Periksa laporan baru sebelum diteruskan ke instansi. Tanda merah dan kuning membantu menyaring laporan palsu.
       </p>

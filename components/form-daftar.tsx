@@ -10,6 +10,7 @@ import { useToast } from "@/components/toast";
 import { mulaiDaftar, verifikasiDaftar } from "@/lib/aksi/akun";
 import { emailValid, hpValid, periksaSandi } from "@/lib/validasi";
 import { tujuanAman } from "@/lib/tujuan";
+import { rayakan } from "@/lib/rayakan";
 
 type Galat = Partial<Record<"nama" | "email" | "hp" | "sandi" | "setuju" | "kode" | "umum", string>>;
 
@@ -49,12 +50,15 @@ export function FormDaftar() {
     });
   }
 
-  function verifikasi(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!otp) return;
+  function verifikasi(kodeMasuk: string) {
+    if (!otp || memproses) return;
     mulai(async () => {
-      const hasil = await verifikasiDaftar(otp.id, kode, lanjut);
-      if (!hasil.ok) return setGalat({ kode: hasil.pesan });
+      const hasil = await verifikasiDaftar(otp.id, kodeMasuk, lanjut);
+      if (!hasil.ok) {
+        setKode("");
+        return setGalat({ kode: hasil.pesan });
+      }
+      rayakan();
       toast("sukses", `Akun berhasil dibuat. Selamat datang, ${hasil.nama.split(" ")[0]}!`);
       router.push(lanjut ? hasil.tujuan : "/lapor");
       router.refresh();
@@ -63,8 +67,26 @@ export function FormDaftar() {
 
   if (otp) {
     return (
-      <form onSubmit={verifikasi} className="space-y-5 motion-safe:animate-muncul" noValidate>
-        <KolomKode idOtp={otp.id} email={otp.email} modeTerminal={otp.modeTerminal} kode={kode} onUbah={setKode} galat={galat.kode} />
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          verifikasi(kode);
+        }}
+        className="space-y-5 motion-safe:animate-muncul"
+        noValidate
+      >
+        <KolomKode
+          idOtp={otp.id}
+          email={otp.email}
+          modeTerminal={otp.modeTerminal}
+          kode={kode}
+          onUbah={(k) => {
+            setKode(k);
+            if (galat.kode) setGalat({});
+          }}
+          onLengkap={verifikasi}
+          galat={galat.kode}
+        />
         <Tombol type="submit" memproses={memproses} disabled={kode.length !== 6} className="w-full py-3 text-base">
           Verifikasi dan buat akun
         </Tombol>

@@ -23,7 +23,7 @@ async function muatLaporan(nomor?: string): Promise<Laporan[]> {
       parameter,
     ),
     kueri(
-      `SELECT nomor, jenis, waktu, aktor, catatan, batas_baru FROM kejadian ${nomor ? "WHERE nomor = $1" : ""} ORDER BY waktu, id`,
+      `SELECT nomor, jenis, waktu, aktor, aktor_id, catatan, batas_baru FROM kejadian ${nomor ? "WHERE nomor = $1" : ""} ORDER BY waktu, id`,
       parameter,
     ),
     kueri(
@@ -41,6 +41,7 @@ async function muatLaporan(nomor?: string): Promise<Laporan[]> {
       aktor: k.aktor as string,
       ...(k.catatan ? { catatan: k.catatan as string } : {}),
       ...(k.batas_baru ? { batasBaru: iso(k.batas_baru) } : {}),
+      ...(k.aktor_id ? { aktorId: String(k.aktor_id) } : {}),
     });
     riwayatPer.set(k.nomor as string, daftar);
   }
@@ -204,4 +205,26 @@ export async function jumlahTandaTidakSesuai(): Promise<Map<string, number>> {
     "SELECT nomor, count(*)::int AS jumlah FROM tanda_tidak_sesuai GROUP BY nomor",
   );
   return new Map(baris.map((b) => [b.nomor, b.jumlah]));
+}
+
+// Kabar terbaru untuk beranda: siapa melakukan apa pada laporan publik
+export function aktivitasTerkini(semua: Laporan[], jumlah = 8) {
+  const daftar: { teks: string; waktu: string; tautan: string }[] = [];
+  for (const l of laporanPublik(semua)) {
+    for (const k of l.riwayat) {
+      const instansi = cariInstansi(l.instansiId).singkatan;
+      const teks =
+        k.jenis === "dibuat" ? `Laporan baru: ${l.judul}`
+        : k.jenis === "diproses" ? `${instansi} mulai mengerjakan: ${l.judul}`
+        : k.jenis === "ditandai_selesai" ? `${instansi} menandai selesai: ${l.judul}`
+        : k.jenis === "dikonfirmasi_beres" ? `Warga mengonfirmasi beres: ${l.judul}`
+        : k.jenis === "balasan" ? `${instansi} mengirim kabar: ${l.judul}`
+        : null;
+      if (teks) daftar.push({ teks, waktu: k.waktu, tautan: `/laporan/${l.nomor}` });
+    }
+  }
+  return daftar
+    .sort((a, b) => b.waktu.localeCompare(a.waktu))
+    .slice(0, jumlah)
+    .map((a) => ({ teks: a.teks, waktuTeks: formatRelatif(a.waktu), tautan: a.tautan }));
 }

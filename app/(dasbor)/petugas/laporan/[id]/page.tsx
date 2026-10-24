@@ -8,7 +8,10 @@ import { cariInstansi, daftarInstansi } from "@/lib/data/referensi";
 import { hitungStatus, hitungTenggat } from "@/lib/sla";
 import { normalisasiNomor } from "@/lib/nomor";
 import { DetailLaporanDasbor } from "@/components/dasbor/detail-laporan";
+import { PenyegarOtomatis } from "@/components/penyegar-otomatis";
 import { PanelPetugas } from "@/components/dasbor/aksi-petugas";
+import { Percakapan } from "@/components/percakapan";
+import { susunPercakapan } from "@/lib/server/percakapan";
 
 export const metadata: Metadata = { title: "Kelola laporan" };
 
@@ -32,9 +35,20 @@ async function IsiKelola({ params }: Pick<PageProps<"/petugas/laporan/[id]">, "p
   const sudahPerpanjang = tenggat !== null && laporan.riwayat.some((k) => k.jenis === "perpanjangan" && k.waktu >= tenggat.mulai);
 
   return (
+    <>
+    <PenyegarOtomatis label={false} />
     <DetailLaporanDasbor
       laporan={laporan}
       kembali={{ href: "/petugas", label: "Laporan instansi" }}
+      tambahan={
+        <Percakapan
+          nomor={laporan.nomor}
+          pesan={susunPercakapan(laporan, pengguna.id, "petugas")}
+          sebagai="petugas"
+          bisaKirim={["diteruskan", "diproses", "menunggu_konfirmasi"].includes(status)}
+          keteranganTutup="Percakapan ditutup karena laporan sudah selesai."
+        />
+      }
       panel={
         <PanelPetugas
           nomor={laporan.nomor}
@@ -46,5 +60,6 @@ async function IsiKelola({ params }: Pick<PageProps<"/petugas/laporan/[id]">, "p
         />
       }
     />
+    </>
   );
 }
