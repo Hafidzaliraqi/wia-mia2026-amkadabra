@@ -4,7 +4,7 @@ import { formatTanggal } from "@/lib/waktu";
 export function StempelSelesai({ waktu }: { waktu: string }) {
   return (
     <div
-      className="inline-flex -rotate-6 flex-col items-center rounded-lg border-[3px] border-tuntas px-4 py-1.5 text-tuntas motion-safe:animate-cap"
+      className="inline-flex -rotate-6 flex-col items-center rounded-lg border-[3px] border-tuntas px-4 py-1.5 text-tuntas"
       role="img"
       aria-label={`Selesai, dikonfirmasi pelapor pada ${formatTanggal(waktu)}`}
     >

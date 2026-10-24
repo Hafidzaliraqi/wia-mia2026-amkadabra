@@ -1,8 +1,12 @@
-// Waktu sekarang. Di komponen server, panggil hanya setelah
-// `await connection()` supaya halaman dirender saat ada permintaan,
-// bukan saat build.
+// Waktu acuan untuk data simulasi.
+// Semua data dummy dihitung relatif terhadap waktu ini supaya tampilan
+// selalu sama (enak buat screenshot dan demo).
+// Nanti kalau sudah pakai database asli, fungsi sekarang() diganti
+// supaya membaca waktu sebenarnya.
+export const WAKTU_DEMO = new Date("2026-10-30T10:00:00+07:00");
+
 export function sekarang(): Date {
-  return new Date();
+  return WAKTU_DEMO;
 }
 
 export const JAM = 60 * 60 * 1000;
@@ -112,9 +116,4 @@ export function formatSisaWaktu(batas: Date | string): {
   else durasi = `${hari} hari ${jam} jam`;
 
   return { teks: lewat ? `Lewat ${durasi}` : `Sisa ${durasi}`, lewat };
-}
-
-// Tanggal dalam format YYYY-MM-DD menurut WIB
-export function tanggalWib(tanggal: Date | string = sekarang()): string {
-  return new Date(new Date(tanggal).getTime() + OFFSET_WIB).toISOString().slice(0, 10);
 }

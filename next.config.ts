@@ -1,13 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
-  // PGlite (database lokal) memuat file WebAssembly, jadi tidak dibundel
-  serverExternalPackages: ["@electric-sql/pglite"],
+  /* config options here */
   experimental: {
-    // Batas ukuran unggahan lewat server action (foto laporan sudah diperkecil di browser)
-    serverActions: { bodySizeLimit: "8mb" },
+    agentFeedback: true,
   },
+  cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
     rules: {
