@@ -34,6 +34,66 @@ export const daftarKota: Kota[] = [
     ],
   },
   {
+    id: "jakbar",
+    nama: "Jakarta Barat",
+    provinsi: "DKI Jakarta",
+    kecamatan: [
+      { nama: "Cengkareng", lat: -6.15, lng: 106.735, jalan: ["Jl. Daan Mogot", "Jl. Kamal Raya"] },
+      { nama: "Grogol Petamburan", lat: -6.163, lng: 106.79, jalan: ["Jl. Kyai Tapa", "Jl. Latumenten"] },
+      { nama: "Taman Sari", lat: -6.145, lng: 106.815, jalan: ["Jl. Hayam Wuruk", "Jl. Mangga Besar"] },
+      { nama: "Tambora", lat: -6.145, lng: 106.8, jalan: ["Jl. Jembatan Dua", "Jl. Pekojan"] },
+      { nama: "Kebon Jeruk", lat: -6.192, lng: 106.77, jalan: ["Jl. Panjang", "Jl. Kebon Jeruk Raya"] },
+      { nama: "Kalideres", lat: -6.14, lng: 106.7, jalan: ["Jl. Peta Selatan", "Jl. Kamal Raya"] },
+      { nama: "Palmerah", lat: -6.2, lng: 106.795, jalan: ["Jl. Palmerah Barat", "Jl. Kemanggisan Raya", "Jl. K.H. Syahdan"] },
+      { nama: "Kembangan", lat: -6.19, lng: 106.74, jalan: ["Jl. Puri Kencana", "Jl. Meruya Ilir"] },
+    ],
+  },
+  {
+    id: "jakpus",
+    nama: "Jakarta Pusat",
+    provinsi: "DKI Jakarta",
+    kecamatan: [
+      { nama: "Gambir", lat: -6.17, lng: 106.82, jalan: ["Jl. Medan Merdeka Barat", "Jl. Ir. H. Juanda"] },
+      { nama: "Sawah Besar", lat: -6.155, lng: 106.83, jalan: ["Jl. Gunung Sahari", "Jl. Pangeran Jayakarta"] },
+      { nama: "Kemayoran", lat: -6.16, lng: 106.85, jalan: ["Jl. Benyamin Sueb", "Jl. Garuda"] },
+      { nama: "Senen", lat: -6.18, lng: 106.845, jalan: ["Jl. Kramat Raya", "Jl. Senen Raya"] },
+      { nama: "Cempaka Putih", lat: -6.18, lng: 106.87, jalan: ["Jl. Letjen Suprapto", "Jl. Cempaka Putih Raya"] },
+      { nama: "Menteng", lat: -6.195, lng: 106.835, jalan: ["Jl. HOS Cokroaminoto", "Jl. Cikini Raya"] },
+      { nama: "Tanah Abang", lat: -6.205, lng: 106.81, jalan: ["Jl. KH Mas Mansyur", "Jl. Jati Baru"] },
+      { nama: "Johar Baru", lat: -6.185, lng: 106.855, jalan: ["Jl. Percetakan Negara", "Jl. Johar Baru Raya"] },
+    ],
+  },
+  {
+    id: "jaktim",
+    nama: "Jakarta Timur",
+    provinsi: "DKI Jakarta",
+    kecamatan: [
+      { nama: "Matraman", lat: -6.205, lng: 106.86, jalan: ["Jl. Matraman Raya", "Jl. Pramuka"] },
+      { nama: "Pulo Gadung", lat: -6.19, lng: 106.9, jalan: ["Jl. Pemuda", "Jl. Bekasi Raya"] },
+      { nama: "Jatinegara", lat: -6.23, lng: 106.87, jalan: ["Jl. Jatinegara Barat", "Jl. Otista Raya"] },
+      { nama: "Kramat Jati", lat: -6.27, lng: 106.865, jalan: ["Jl. Raya Bogor", "Jl. Dewi Sartika"] },
+      { nama: "Pasar Rebo", lat: -6.315, lng: 106.86, jalan: ["Jl. TB Simatupang", "Jl. Raya Bogor"] },
+      { nama: "Cakung", lat: -6.18, lng: 106.945, jalan: ["Jl. Raya Bekasi", "Jl. Cakung Cilincing"] },
+      { nama: "Duren Sawit", lat: -6.23, lng: 106.91, jalan: ["Jl. Kolonel Sugiono", "Jl. Raden Inten"] },
+      { nama: "Makasar", lat: -6.27, lng: 106.885, jalan: ["Jl. Raya Pondok Gede", "Jl. Halim Perdanakusuma"] },
+      { nama: "Ciracas", lat: -6.33, lng: 106.875, jalan: ["Jl. Raya Ciracas", "Jl. Raya Lapangan Tembak"] },
+      { nama: "Cipayung", lat: -6.32, lng: 106.9, jalan: ["Jl. Raya Cipayung", "Jl. Bambu Apus"] },
+    ],
+  },
+  {
+    id: "jakut",
+    nama: "Jakarta Utara",
+    provinsi: "DKI Jakarta",
+    kecamatan: [
+      { nama: "Penjaringan", lat: -6.125, lng: 106.78, jalan: ["Jl. Pluit Raya", "Jl. Muara Karang"] },
+      { nama: "Pademangan", lat: -6.135, lng: 106.835, jalan: ["Jl. RE Martadinata", "Jl. Pademangan Raya"] },
+      { nama: "Tanjung Priok", lat: -6.12, lng: 106.875, jalan: ["Jl. Enggano", "Jl. Yos Sudarso"] },
+      { nama: "Koja", lat: -6.115, lng: 106.905, jalan: ["Jl. Plumpang Raya", "Jl. Koja Raya"] },
+      { nama: "Kelapa Gading", lat: -6.16, lng: 106.905, jalan: ["Jl. Boulevard Raya", "Jl. Kelapa Gading Raya"] },
+      { nama: "Cilincing", lat: -6.12, lng: 106.945, jalan: ["Jl. Cilincing Raya", "Jl. Kalibaru"] },
+    ],
+  },
+  {
     id: "kota-bogor",
     nama: "Kota Bogor",
     provinsi: "Jawa Barat",
@@ -139,4 +199,24 @@ export function wilayahTerdekat(titik: { lat: number; lng: number }) {
     }
   }
   return terbaik;
+}
+
+function bersihkan(teks: string) {
+  return teks
+    .toLowerCase()
+    .replace(/^(kecamatan|kota administrasi|kota adm\.|kota|kabupaten|kab\.|daerah khusus ibukota|provinsi)\s+/g, "")
+    .trim();
+}
+
+// Cocokkan bagian alamat dari peta (OpenStreetMap) dengan wilayah layanan.
+// Mengembalikan null kalau kecamatannya tidak ada di daftar.
+export function cocokkanWilayah(bagianAlamat: string[]): { kota: Kota; kecamatan: Kecamatan } | null {
+  const bagian = bagianAlamat.map(bersihkan);
+  const kandidat = daftarKota.flatMap((kota) =>
+    kota.kecamatan.filter((k) => bagian.includes(k.nama.toLowerCase())).map((kecamatan) => ({ kota, kecamatan })),
+  );
+  if (kandidat.length === 0) return null;
+  // Kalau nama kecamatan sama di dua kota, pilih yang nama kotanya juga muncul di alamat
+  const namaKotaDasar = (k: Kota) => bersihkan(k.nama);
+  return kandidat.find((c) => bagian.some((b) => b.includes(namaKotaDasar(c.kota)))) ?? kandidat[0];
 }

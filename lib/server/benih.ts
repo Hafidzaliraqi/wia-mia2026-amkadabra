@@ -410,12 +410,16 @@ const namaDepan = [
 ];
 
 const bobotKota: [string, number][] = [
-  ["jaksel", 30],
-  ["kota-bogor", 15],
-  ["kab-bogor", 15],
-  ["depok", 15],
-  ["kota-bandung", 15],
-  ["kab-garut", 10],
+  ["jaksel", 20],
+  ["jakbar", 12],
+  ["jakpus", 8],
+  ["jaktim", 10],
+  ["jakut", 8],
+  ["kota-bogor", 9],
+  ["kab-bogor", 9],
+  ["depok", 9],
+  ["kota-bandung", 8],
+  ["kab-garut", 7],
 ];
 
 const bobotKategori: Partial<Record<KategoriId, number>> = {
@@ -635,7 +639,7 @@ export async function isiDataContoh(kueri: Kueri) {
   }
 
   const unggulan = laporanUnggulan(sekarang);
-  const acak = laporanAcak(sekarang, 240);
+  const acak = laporanAcak(sekarang, 300);
 
   // Nomor urut acak mulai 101 per bulan supaya tidak bentrok dengan laporan unggulan
   const urutPerBulan = new Map<string, number>();

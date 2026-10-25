@@ -27,11 +27,12 @@ import { KategoriIkon, KelompokIkon } from "@/components/kategori-ikon";
 import { StatusBadge } from "@/components/status-badge";
 import { Tombol } from "@/components/dialog";
 import { useToast } from "@/components/toast";
-import { cariAlamat, type HasilAlamat } from "@/lib/geokode";
+import { alamatDariTitik, cariAlamat, type HasilAlamat } from "@/lib/geokode";
 import { siapkanFoto, type FotoSiap } from "@/lib/foto-klien";
 import { buatLaporan } from "@/lib/aksi/laporan";
 import { cariKategori, daftarKategori, daftarKelompok, instansiTujuan } from "@/lib/data/referensi";
 import { daftarKota, jarakKm, wilayahTerdekat } from "@/lib/wilayah";
+import { rayakan } from "@/lib/rayakan";
 
 // Peta hanya bisa jalan di browser, jadi dimuat terpisah tanpa server rendering
 const PetaLokasi = dynamic(() => import("@/components/peta-lokasi"), {
@@ -85,7 +86,9 @@ export function FormLaporan({
   const [alamat, setAlamat] = useState("");
   const [kotaId, setKotaId] = useState("");
   const [kecamatan, setKecamatan] = useState("");
-  const [luarWilayah, setLuarWilayah] = useState(false);
+  const [alamatDiketik, setAlamatDiketik] = useState(false);
+  const [deteksi, setDeteksi] = useState<{ status: "diam" | "mendeteksi" | "cocok" | "perkiraan" | "luar"; teks?: string }>({ status: "diam" });
+  const pewaktuDeteksi = useRef<number | undefined>(undefined);
   const [kataCari, setKataCari] = useState("");
   const [saran, setSaran] = useState<HasilAlamat[]>([]);
   const [statusCari, setStatusCari] = useState<"diam" | "mencari" | "gagal" | "kosong">("diam");
@@ -114,8 +117,7 @@ export function FormLaporan({
     const pewaktu = window.setTimeout(async () => {
       setStatusCari("mencari");
       try {
-        const kecamatanSemua = daftarKota.flatMap((k) => k.kecamatan.map((c) => c.nama));
-        const hasil = await cariAlamat(kata, kecamatanSemua, pembatal.signal);
+        const hasil = await cariAlamat(kata, pembatal.signal);
         setSaran(hasil);
         setStatusCari(hasil.length ? "diam" : "kosong");
       } catch {
@@ -137,20 +139,45 @@ export function FormLaporan({
   }, [foto]);
   useEffect(() => () => fotoTerakhir.current.forEach((f) => URL.revokeObjectURL(f.pratinjau)), []);
 
-  // Pilih titik: daerah langsung ditebak dari kecamatan terdekat (tanpa internet)
-  function pilihTitik(baru: Titik, pindahkanPeta = false, alamatBaru?: string) {
+  // Pilih titik: daerah ditebak dulu dari kecamatan terdekat (cepat, tanpa internet),
+  // lalu dipastikan dari alamat peta OpenStreetMap.
+  function pilihTitik(baru: Titik, pindahkanPeta = false, dariPencarian?: HasilAlamat) {
     setTitik(baru);
     setGalat(null);
     if (pindahkanPeta) setFokus((lama) => ({ titik: baru, urut: (lama?.urut ?? 0) + 1 }));
-    if (alamatBaru) setAlamat(alamatBaru);
+
+    const terapkan = (hasil: HasilAlamat) => {
+      if (!alamatDiketik && hasil.nama) setAlamat(hasil.nama);
+      if (hasil.wilayah) {
+        setKotaId(hasil.wilayah.kotaId);
+        setKecamatan(hasil.wilayah.kecamatan);
+        setDeteksi({ status: "cocok" });
+      } else {
+        setDeteksi({ status: "luar", teks: hasil.daerahTerbaca });
+      }
+    };
+    if (dariPencarian) return terapkan(dariPencarian);
+
     const terdekat = wilayahTerdekat(baru);
     if (terdekat && terdekat.jarak <= RADIUS_LAYANAN_KM) {
       setKotaId(terdekat.kota.id);
       setKecamatan(terdekat.kecamatan.nama);
-      setLuarWilayah(false);
-    } else {
-      setLuarWilayah(true);
     }
+    setDeteksi({ status: "mendeteksi" });
+    window.clearTimeout(pewaktuDeteksi.current);
+    pewaktuDeteksi.current = window.setTimeout(async () => {
+      try {
+        const hasil = await alamatDariTitik(baru.lat, baru.lng);
+        if (hasil) return terapkan(hasil);
+      } catch {
+        // Tanpa internet ke peta: pakai perkiraan kecamatan terdekat
+      }
+      setDeteksi(
+        terdekat && terdekat.jarak <= RADIUS_LAYANAN_KM
+          ? { status: "perkiraan" }
+          : { status: "luar", teks: "" },
+      );
+    }, 600);
   }
 
   function pakaiLokasiSaya() {
@@ -256,6 +283,7 @@ export function FormLaporan({
         return;
       }
       setTerkirim(hasil.nomor);
+      rayakan();
       toast("sukses", `Laporan ${hasil.nomor} terkirim.`);
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
@@ -371,7 +399,7 @@ export function FormLaporan({
                       <button
                         type="button"
                         onClick={() => {
-                          pilihTitik({ lat: s.lat, lng: s.lng }, true, s.nama);
+                          pilihTitik({ lat: s.lat, lng: s.lng }, true, s);
                           setSaran([]);
                           setKataCari("");
                           setStatusCari("diam");
@@ -387,12 +415,7 @@ export function FormLaporan({
               )}
               <PetaLokasi titik={titik} pusatAwal={pusatAwal} fokus={fokus} onPilih={(t) => pilihTitik(t)} />
               <p className="text-sm text-tinta-redup">{titik ? "Geser pin untuk titik yang lebih tepat." : "Belum ada titik. Klik peta untuk menaruh pin."}</p>
-              {luarWilayah && (
-                <p className="flex gap-2 rounded-xl bg-waspada-muda px-3.5 py-2.5 text-sm text-waspada">
-                  <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                  Titik ini di luar wilayah layanan saat ini. Pilih kota dan kecamatan terdekat secara manual.
-                </p>
-              )}
+              <StatusDeteksi deteksi={deteksi} kota={daftarKota.find((k) => k.id === kotaId)?.nama} kecamatan={kecamatan} />
             </div>
 
             <div className="mt-6 space-y-4">
@@ -403,7 +426,10 @@ export function FormLaporan({
                 <input
                   id="alamat"
                   value={alamat}
-                  onChange={(e) => setAlamat(e.target.value)}
+                  onChange={(e) => {
+                    setAlamat(e.target.value);
+                    setAlamatDiketik(true);
+                  }}
                   placeholder="Contoh: Jl. Tebet Raya, depan minimarket"
                   className="w-full rounded-xl border border-garis bg-white px-4 py-3 text-base focus:border-rambu focus:outline-none"
                 />
@@ -772,5 +798,48 @@ function LangkahBerikut({ nomor, judul, isi }: { nomor: number; judul: string; i
         <span className="text-tinta-redup">{isi}</span>
       </span>
     </li>
+  );
+}
+
+function StatusDeteksi({
+  deteksi,
+  kota,
+  kecamatan,
+}: {
+  deteksi: { status: "diam" | "mendeteksi" | "cocok" | "perkiraan" | "luar"; teks?: string };
+  kota?: string;
+  kecamatan: string;
+}) {
+  if (deteksi.status === "diam") return null;
+  if (deteksi.status === "mendeteksi") {
+    return (
+      <p className="flex items-center gap-2 text-sm text-tinta-redup" role="status">
+        <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+        Mendeteksi daerah dari titik peta…
+      </p>
+    );
+  }
+  if (deteksi.status === "cocok") {
+    return (
+      <p className="flex items-center gap-2 rounded-xl bg-tuntas-muda px-3.5 py-2.5 text-sm text-tuntas motion-safe:animate-muncul" role="status">
+        <CircleCheck className="size-4 shrink-0" aria-hidden="true" />
+        Terdeteksi: Kecamatan {kecamatan}, {kota}
+      </p>
+    );
+  }
+  if (deteksi.status === "perkiraan") {
+    return (
+      <p className="flex gap-2 rounded-xl bg-kertas px-3.5 py-2.5 text-sm text-tinta-redup" role="status">
+        <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+        Perkiraan daerah terdekat: Kecamatan {kecamatan}, {kota}. Pastikan sudah sesuai di bawah.
+      </p>
+    );
+  }
+  return (
+    <p className="flex gap-2 rounded-xl bg-waspada-muda px-3.5 py-2.5 text-sm text-waspada" role="status">
+      <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      {deteksi.teks ? `Titik ini ada di ${deteksi.teks}, ` : "Titik ini "}belum masuk wilayah layanan. Pilih kota dan kecamatan
+      terdekat secara manual.
+    </p>
   );
 }

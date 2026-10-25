@@ -16,7 +16,7 @@ export default function TataLetakPublik({ children }: { children: React.ReactNod
       <main className="flex-1">{children}</main>
       <Footer />
       <Suspense fallback={<NavBawahTampilan pathname={null} />}>
-        <NavBawah />
+        <NavBawahDenganSesi />
       </Suspense>
     </div>
   );
@@ -32,4 +32,10 @@ async function NavAtasDenganSesi() {
       notifikasi={notifikasi}
     />
   );
+}
+
+async function NavBawahDenganSesi() {
+  await connection();
+  const pengguna = await penggunaSaatIni();
+  return <NavBawah peran={pengguna?.peran ?? null} />;
 }

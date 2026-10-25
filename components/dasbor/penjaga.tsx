@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { penggunaSaatIni } from "@/lib/server/sesi";
 import { cariInstansi } from "@/lib/data/referensi";
+import { ambilNotifikasi } from "@/lib/server/notifikasi";
 import { BingkaiDasbor } from "@/components/dasbor/bingkai";
 
 // Hanya peran yang sesuai yang boleh masuk dasbor
@@ -21,9 +22,11 @@ export async function PenjagaDasbor({ peran, children }: { peran: "petugas" | "a
       </div>
     );
   }
+  const notifikasi = await ambilNotifikasi(pengguna.id);
   return (
     <BingkaiDasbor
       peran={peran}
+      notifikasi={notifikasi}
       nama={pengguna.nama}
       keterangan={pengguna.instansiId ? cariInstansi(pengguna.instansiId).nama : "Semua wilayah layanan"}
     >

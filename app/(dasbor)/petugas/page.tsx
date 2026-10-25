@@ -7,13 +7,17 @@ import { keItemKerja } from "@/lib/server/kerja";
 import { cariInstansi } from "@/lib/data/referensi";
 import { apakahTerlambat, hitungStatus } from "@/lib/sla";
 import { DaftarKerja, KartuRingkas } from "@/components/dasbor/daftar-kerja";
+import { PenyegarOtomatis } from "@/components/penyegar-otomatis";
 
 export const metadata: Metadata = { title: "Dasbor petugas" };
 
 export default function HalamanPetugas() {
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="text-2xl font-extrabold tracking-tight">Laporan instansi</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-extrabold tracking-tight">Laporan instansi</h1>
+        <PenyegarOtomatis detik={20} />
+      </div>
       <p className="mt-1 text-tinta-redup">Diurutkan dari tenggat paling dekat. Kerjakan yang paling mendesak dulu.</p>
       <Suspense fallback={<div className="mt-6 h-96 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>
         <IsiPetugas />

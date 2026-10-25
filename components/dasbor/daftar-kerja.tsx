@@ -7,6 +7,7 @@ import type { KategoriId, StatusLaporan } from "@/lib/types";
 import type { Risiko } from "@/lib/server/risiko";
 import { KategoriIkon } from "@/components/kategori-ikon";
 import { StatusBadge, TerlambatBadge } from "@/components/status-badge";
+import { AngkaNaik } from "@/components/angka-naik";
 
 export interface ItemKerja {
   nomor: string;
@@ -121,7 +122,9 @@ export function KartuRingkas({ data }: { data: { label: string; nilai: number; b
       {data.map((d) => (
         <div key={d.label} className="rounded-2xl border border-garis bg-white p-4">
           <dt className="text-sm text-tinta-redup">{d.label}</dt>
-          <dd className={`angka mt-1 text-2xl font-extrabold ${d.bahaya && d.nilai > 0 ? "text-bahaya" : ""}`}>{d.nilai}</dd>
+          <dd className={`mt-1 text-2xl font-extrabold ${d.bahaya && d.nilai > 0 ? "text-bahaya" : ""}`}>
+            <AngkaNaik nilai={d.nilai} />
+          </dd>
         </div>
       ))}
     </dl>

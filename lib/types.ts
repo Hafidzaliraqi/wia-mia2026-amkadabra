@@ -64,7 +64,8 @@ export type JenisKejadian =
   | "diteruskan"
   | "dialihkan"
   | "diproses"
-  | "balasan"
+  | "balasan" // pesan petugas ke warga
+  | "tanggapan" // pesan warga (pelapor/pendukung) ke petugas
   | "perpanjangan"
   | "eskalasi"
   | "ditandai_selesai"
@@ -79,6 +80,7 @@ export interface Kejadian {
   aktor: string; // "Pelapor", "Admin verifikator", nama instansi, atau "Sistem"
   catatan?: string;
   batasBaru?: string; // khusus "perpanjangan"
+  aktorId?: string; // akun yang melakukan (kalau ada)
 }
 
 export type Visibilitas = "publik" | "sembunyikan_nama" | "privat";

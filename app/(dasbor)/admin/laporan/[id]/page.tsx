@@ -10,7 +10,10 @@ import { apakahTerlambat, hitungStatus } from "@/lib/sla";
 import { normalisasiNomor } from "@/lib/nomor";
 import { formatRelatif } from "@/lib/waktu";
 import { DetailLaporanDasbor } from "@/components/dasbor/detail-laporan";
+import { PenyegarOtomatis } from "@/components/penyegar-otomatis";
 import { PanelAdmin } from "@/components/dasbor/aksi-admin";
+import { Percakapan } from "@/components/percakapan";
+import { susunPercakapan } from "@/lib/server/percakapan";
 
 export const metadata: Metadata = { title: "Periksa laporan" };
 
@@ -36,11 +39,15 @@ async function IsiPeriksa({ params }: Pick<PageProps<"/admin/laporan/[id]">, "pa
   );
 
   return (
+    <>
+    <PenyegarOtomatis label={false} />
     <DetailLaporanDasbor
       laporan={laporan}
       kembali={{ href: "/admin", label: "Antrean verifikasi" }}
       tambahan={
-        tanda.length > 0 && (
+        <>
+        <Percakapan nomor={laporan.nomor} pesan={susunPercakapan(laporan, null, "petugas")} sebagai="admin" bisaKirim={false} keteranganTutup="Admin memantau percakapan petugas dan warga." />
+        {tanda.length > 0 && (
           <section className="rounded-2xl border border-garis bg-white p-5 sm:p-6">
             <h2 className="font-bold">Ditandai tidak sesuai oleh warga</h2>
             <ul className="mt-3 space-y-2">
@@ -52,7 +59,8 @@ async function IsiPeriksa({ params }: Pick<PageProps<"/admin/laporan/[id]">, "pa
               ))}
             </ul>
           </section>
-        )
+        )}
+        </>
       }
       panel={
         <PanelAdmin
@@ -62,8 +70,15 @@ async function IsiPeriksa({ params }: Pick<PageProps<"/admin/laporan/[id]">, "pa
           instansiDefault={instansiTujuan(laporan.kategoriId, laporan.kotaId).id}
           instansiWilayah={daftarInstansi.filter((i) => i.kotaId === laporan.kotaId).map((i) => ({ id: i.id, nama: i.nama }))}
           risiko={risiko}
+          jumlahTanda={tanda.length}
+          aktif={["terkirim", "diteruskan", "diproses", "menunggu_konfirmasi"].includes(status)}
+          teguranTerakhir={(() => {
+            const t = laporan.riwayat.findLast((k) => k.jenis === "eskalasi" && k.aktor === "Admin pengawas");
+            return t ? formatRelatif(t.waktu) : null;
+          })()}
         />
       }
     />
+    </>
   );
 }

@@ -12,6 +12,11 @@ import {
 } from "@/lib/data/referensi";
 import { laporanPerBulan, raporInstansi } from "@/lib/statistik";
 import { TabelRapor } from "@/components/rapor-instansi";
+import { PetaSebaranMuat } from "@/components/peta-sebaran-muat";
+import type { TitikSebaran } from "@/components/peta-sebaran";
+import { apakahTerlambat } from "@/lib/sla";
+import { daftarKota } from "@/lib/wilayah";
+import { HARI, sekarang } from "@/lib/waktu";
 import { KelompokIkon } from "@/components/kategori-ikon";
 
 export const metadata: Metadata = { title: "Transparansi" };
@@ -26,6 +31,23 @@ export default function HalamanTransparansi() {
       </p>
 
       <section className="mt-10">
+        <h2 className="text-xl font-bold">Peta sebaran laporan</h2>
+        <p className="mt-1 text-sm text-tinta-redup">
+          90 hari terakhir. Makin besar lingkaran, makin banyak laporan. Warna menunjukkan porsi laporan yang lewat batas waktu.
+        </p>
+        <div className="mt-4">
+          <Suspense fallback={<div className="h-[420px] animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>
+            <BagianPeta />
+          </Suspense>
+        </div>
+        <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-tinta-redup">
+          <li className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-tuntas" />Kurang dari 10% lewat batas</li>
+          <li className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-waspada-terang" />10–25% lewat batas</li>
+          <li className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-bahaya" />Lebih dari 25% lewat batas</li>
+        </ul>
+      </section>
+
+      <section className="mt-12">
         <h2 className="text-xl font-bold">Rapor instansi</h2>
         <div className="mt-4">
           <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>
@@ -76,6 +98,28 @@ export default function HalamanTransparansi() {
       </div>
     </div>
   );
+}
+
+async function BagianPeta() {
+  await connection();
+  const batas = sekarang().getTime() - 90 * HARI;
+  const semua = (await ambilSemuaLaporan()).filter((l) => new Date(l.dibuatPada).getTime() >= batas);
+  const titik: TitikSebaran[] = daftarKota.flatMap((kota) =>
+    kota.kecamatan
+      .map((kec) => {
+        const milik = semua.filter((l) => l.kotaId === kota.id && l.kecamatan === kec.nama);
+        return {
+          kunci: `${kota.id}-${kec.nama}`,
+          nama: `Kec. ${kec.nama}, ${kota.nama}`,
+          lat: kec.lat,
+          lng: kec.lng,
+          total: milik.length,
+          terlambat: milik.filter(apakahTerlambat).length,
+        };
+      })
+      .filter((t) => t.total > 0),
+  );
+  return <PetaSebaranMuat titik={titik} />;
 }
 
 async function BagianRapor() {
