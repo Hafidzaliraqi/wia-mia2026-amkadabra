@@ -15,7 +15,7 @@ export default function HalamanPetugas() {
   return (
     <div className="mx-auto max-w-6xl">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-extrabold tracking-tight">Laporan instansi</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight">Laporan instansi</h1>
         <PenyegarOtomatis detik={20} />
       </div>
       <p className="mt-1 text-tinta-redup">Diurutkan dari tenggat paling dekat. Kerjakan yang paling mendesak dulu.</p>

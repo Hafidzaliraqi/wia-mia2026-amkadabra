@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Riwayat" };
 export default function HalamanRiwayat() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:py-10">
-      <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Riwayat laporan</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Riwayat laporan</h1>
       <p className="mt-2 max-w-2xl text-tinta-redup">Laporan yang kamu buat dan laporan warga lain yang kamu dukung.</p>
       <div className="mt-8">
         <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>

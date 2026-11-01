@@ -13,7 +13,7 @@ export default function HalamanLapor() {
   return (
     <div className="px-4 py-8 sm:px-6 lg:py-10">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Buat laporan</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Buat laporan</h1>
         <p className="mt-2 text-tinta-redup">Enam langkah singkat. Kamu bisa kembali ke langkah sebelumnya kapan saja.</p>
       </div>
       <div className="mt-8">
@@ -32,7 +32,7 @@ async function IsiLapor() {
   if (!pengguna) {
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-garis bg-white p-6 text-center sm:p-10">
-        <h2 className="text-xl font-bold">Masuk dulu untuk membuat laporan</h2>
+        <h2 className="text-2xl font-extrabold">Masuk dulu untuk membuat laporan</h2>
         <p className="mx-auto mt-2 max-w-md leading-relaxed text-tinta-redup">
           Akun dibutuhkan supaya kamu dapat kabar perkembangan dan bisa mengonfirmasi saat laporanmu selesai dikerjakan.
           Namamu tetap bisa disembunyikan dari publik.
@@ -52,7 +52,7 @@ async function IsiLapor() {
   if (pengguna.peran !== "warga") {
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-garis bg-white p-6 text-center sm:p-10">
-        <h2 className="text-xl font-bold">Akun {pengguna.peran} tidak bisa membuat laporan</h2>
+        <h2 className="text-2xl font-extrabold">Akun {pengguna.peran} tidak bisa membuat laporan</h2>
         <p className="mx-auto mt-2 max-w-md leading-relaxed text-tinta-redup">
           Supaya tidak ada konflik kepentingan, laporan hanya dibuat dari akun warga.
         </p>

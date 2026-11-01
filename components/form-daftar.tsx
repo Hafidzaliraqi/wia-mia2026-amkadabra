@@ -24,7 +24,7 @@ export function FormDaftar() {
   const [sandi, setSandi] = useState("");
   const [setuju, setSetuju] = useState(false);
   const [galat, setGalat] = useState<Galat>({});
-  const [otp, setOtp] = useState<{ id: string; email: string; modeTerminal: boolean } | null>(null);
+  const [otp, setOtp] = useState<{ id: string; email: string } | null>(null);
   const [kode, setKode] = useState("");
   const [memproses, mulai] = useTransition();
 
@@ -44,7 +44,7 @@ export function FormDaftar() {
     mulai(async () => {
       const hasil = await mulaiDaftar({ nama, email, hp, sandi });
       if (!hasil.ok) return setGalat({ ...hasil.galat, umum: hasil.galat ? undefined : hasil.pesan });
-      setOtp({ id: hasil.idOtp, email: hasil.email, modeTerminal: hasil.modeTerminal });
+      setOtp({ id: hasil.idOtp, email: hasil.email });
       setKode("");
       toast("info", "Kode verifikasi sudah dikirim ke emailmu.");
     });
@@ -78,7 +78,6 @@ export function FormDaftar() {
         <KolomKode
           idOtp={otp.id}
           email={otp.email}
-          modeTerminal={otp.modeTerminal}
           kode={kode}
           onUbah={(k) => {
             setKode(k);

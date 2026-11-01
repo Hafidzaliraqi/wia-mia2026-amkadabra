@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Pemantauan tenggat" };
 export default function HalamanPemantauan() {
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="text-2xl font-extrabold tracking-tight">Pemantauan tenggat</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight">Pemantauan tenggat</h1>
       <p className="mt-1 text-tinta-redup">Laporan yang lewat batas waktu, dikelompokkan per tahap. Buka laporan untuk mengirim teguran.</p>
       <Suspense fallback={<div className="mt-6 h-96 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>
         <IsiPemantauan />

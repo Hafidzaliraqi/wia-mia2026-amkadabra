@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { MailCheck, Terminal } from "lucide-react";
+import { MailCheck } from "lucide-react";
 import { KotakKode } from "@/components/kotak-kode";
 import { Tombol } from "@/components/dialog";
 import { useToast } from "@/components/toast";
@@ -11,7 +11,6 @@ import { kirimUlangKode } from "@/lib/aksi/akun";
 export function KolomKode({
   idOtp,
   email,
-  modeTerminal,
   kode,
   onUbah,
   onLengkap,
@@ -19,7 +18,6 @@ export function KolomKode({
 }: {
   idOtp: string;
   email: string;
-  modeTerminal: boolean;
   kode: string;
   onUbah: (kode: string) => void;
   onLengkap?: (kode: string) => void;
@@ -40,17 +38,9 @@ export function KolomKode({
       <p className="flex gap-3 rounded-xl bg-rambu-muda px-4 py-3 text-sm leading-relaxed text-rambu-tua">
         <MailCheck className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
         <span>
-          Kode 6 digit sudah dikirim ke <span className="font-semibold">{email}</span>. Cek juga folder spam. Kode berlaku 10 menit.
+          Kode 6 digit sudah dikirim ke <span className="font-semibold">{email}</span>. Kode berlaku 10 menit.
         </span>
       </p>
-      {modeTerminal && (
-        <p className="flex gap-3 rounded-xl border border-dashed border-garis px-4 py-3 text-sm text-tinta-redup">
-          <Terminal className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
-          <span>
-            Mode pengembangan: pengiriman email belum diatur, jadi isi email dicetak di terminal tempat <code>npm run dev</code> berjalan.
-          </span>
-        </p>
-      )}
       <div>
         <p className="mb-2 text-sm font-semibold">Kode verifikasi</p>
         <KotakKode nilai={kode} onUbah={onUbah} onLengkap={onLengkap} galat={Boolean(galat)} idGalat="galat-kode" />

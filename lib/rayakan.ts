@@ -11,7 +11,7 @@ export function rayakan() {
   kanvas.height = window.innerHeight * rasio;
   const ctx = kanvas.getContext("2d")!;
   ctx.scale(rasio, rasio);
-  const warna = ["#1f4fa8", "#157347", "#d99a1c", "#e6edf9", "#13233d"];
+  const warna = ["#1e48d4", "#0a7446", "#ffc93c", "#e8edfd", "#0a1322"];
   const partikel = Array.from({ length: 110 }, () => ({
     x: window.innerWidth / 2 + (Math.random() - 0.5) * 120,
     y: window.innerHeight * 0.35,

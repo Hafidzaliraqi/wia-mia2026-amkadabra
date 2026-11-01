@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Akun petugas" };
 export default function HalamanAkunPetugas() {
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="text-2xl font-extrabold tracking-tight">Akun petugas</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight">Akun petugas</h1>
       <p className="mt-1 text-tinta-redup">Akun petugas hanya bisa dibuat admin, supaya tidak ada yang mengaku-ngaku petugas.</p>
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <Suspense fallback={<div className="h-96 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>

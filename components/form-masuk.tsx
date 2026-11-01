@@ -7,16 +7,10 @@ import { KeyRound } from "lucide-react";
 import { KolomIsian } from "@/components/kolom-isian";
 import { Tombol } from "@/components/dialog";
 import { useToast } from "@/components/toast";
-import { masuk } from "@/lib/aksi/akun";
+import { masuk, masukDemo } from "@/lib/aksi/akun";
 import { tujuanAman } from "@/lib/tujuan";
 
 // Akun contoh untuk juri (dibuat otomatis bersama data contoh)
-const akunDemo = [
-  { label: "Warga", email: "warga@demo.id" },
-  { label: "Petugas DPU Jakarta Selatan", email: "petugas.dpu@demo.id" },
-  { label: "Admin verifikator", email: "admin@demo.id" },
-];
-const SANDI_DEMO = "demo1234";
 
 export function FormMasuk() {
   const router = useRouter();
@@ -26,6 +20,8 @@ export function FormMasuk() {
   const [sandi, setSandi] = useState("");
   const [galat, setGalat] = useState<string | null>(null);
   const [memproses, mulai] = useTransition();
+  const [memprosesDemo, setMemprosesDemo] = useState<string | null>(null);
+  const [, mulaiDemo] = useTransition();
 
   function kirim(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -42,6 +38,39 @@ export function FormMasuk() {
 
   return (
     <>
+      <section id="demo" className="mb-6 rounded-2xl border border-rambu/25 bg-rambu-muda/50 p-4">
+        <p className="flex items-center gap-2 font-bold">
+          <KeyRound className="size-4 text-rambu" aria-hidden="true" />
+          Coba tanpa daftar
+        </p>
+        <p className="mt-1 text-sm text-tinta-redup">Masuk sekali klik ke akun demo.</p>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {(["warga", "petugas", "admin"] as const).map((peran) => (
+            <button
+              key={peran}
+              type="button"
+              disabled={memprosesDemo !== null}
+              onClick={() => {
+                setMemprosesDemo(peran);
+                mulaiDemo(async () => {
+                  const hasil = await masukDemo(peran);
+                  if (!hasil.ok) {
+                    setMemprosesDemo(null);
+                    return toast("galat", hasil.pesan);
+                  }
+                  toast("sukses", `Masuk sebagai ${hasil.nama}.`);
+                  router.push(hasil.tujuan);
+                  router.refresh();
+                });
+              }}
+              className="rounded-xl bg-white px-2 py-2.5 text-sm font-semibold text-rambu ring-1 ring-rambu/30 ring-inset transition hover:bg-rambu hover:text-white disabled:opacity-60"
+            >
+              {memprosesDemo === peran ? "Masuk…" : peran === "warga" ? "Warga" : peran === "petugas" ? "Petugas" : "Admin"}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <form onSubmit={kirim} className="space-y-5" noValidate>
         {galat && (
           <p role="alert" className="rounded-xl bg-bahaya-muda px-4 py-3 text-sm text-bahaya motion-safe:animate-muncul">
@@ -67,36 +96,6 @@ export function FormMasuk() {
         </Link>
       </p>
 
-      <div className="mt-6 rounded-xl border border-dashed border-garis p-4 text-sm">
-        <p className="flex items-center gap-2 font-semibold">
-          <KeyRound className="size-4 text-rambu" aria-hidden="true" />
-          Akun demo untuk juri
-        </p>
-        <p className="mt-1 text-tinta-redup">
-          Semua kata sandi: <span className="font-semibold text-tinta">{SANDI_DEMO}</span>
-        </p>
-        <ul className="mt-2 space-y-1.5">
-          {akunDemo.map((a) => (
-            <li key={a.email} className="flex flex-wrap items-center justify-between gap-2">
-              <span>
-                <span className="font-semibold">{a.label}</span>
-                <span className="block text-xs text-tinta-redup">{a.email}</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setAkun(a.email);
-                  setSandi(SANDI_DEMO);
-                  setGalat(null);
-                }}
-                className="rounded-lg px-2.5 py-1 font-semibold text-rambu ring-1 ring-rambu/30 ring-inset hover:bg-rambu-muda"
-              >
-                Pakai
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
     </>
   );
 }

@@ -33,16 +33,21 @@ export function LangkahStatus({ status }: { status: StatusLaporan }) {
         return (
           <li key={nama} className="relative flex flex-col items-center gap-2 text-center">
             {i > 0 && (
-              <span
-                aria-hidden="true"
-                className={`absolute top-[7px] right-1/2 h-0.5 w-full ${
-                  i <= sekarang ? (tuntas ? "bg-tuntas" : "bg-rambu") : "bg-garis"
-                }`}
-              />
+              <>
+                <span aria-hidden="true" className="absolute top-[7px] right-1/2 h-0.5 w-full bg-garis" />
+                {i <= sekarang && (
+                  <span
+                    aria-hidden="true"
+                    className={`absolute top-[7px] right-1/2 h-0.5 w-full origin-left motion-safe:animate-isi-garis ${tuntas ? "bg-tuntas" : "bg-rambu"}`}
+                    style={{ animationDelay: `${i * 160}ms` }}
+                  />
+                )}
+              </>
             )}
             <span
               aria-hidden="true"
-              className={`relative z-10 flex size-4 items-center justify-center rounded-full ${
+              style={lewat || aktif ? { animationDelay: `${i * 160 + 80}ms` } : undefined}
+              className={`relative z-10 flex size-4 items-center justify-center rounded-full ${lewat || aktif ? "motion-safe:animate-titik" : ""} ${
                 lewat
                   ? tuntas
                     ? "bg-tuntas"

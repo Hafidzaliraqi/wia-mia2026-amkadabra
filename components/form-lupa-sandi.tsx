@@ -14,7 +14,7 @@ export function FormLupaSandi() {
   const router = useRouter();
   const toast = useToast();
   const [akun, setAkun] = useState("");
-  const [otp, setOtp] = useState<{ id: string; modeTerminal: boolean } | null>(null);
+  const [otp, setOtp] = useState<{ id: string; tujuan: string } | null>(null);
   const [kode, setKode] = useState("");
   const [sandi, setSandi] = useState("");
   const [galat, setGalat] = useState<{ akun?: string; kode?: string; sandi?: string }>({});
@@ -27,7 +27,7 @@ export function FormLupaSandi() {
       const hasil = await mintaAturSandi(akun);
       if (!hasil.ok) return setGalat({ akun: hasil.pesan });
       setGalat({});
-      setOtp({ id: hasil.idOtp, modeTerminal: hasil.modeTerminal });
+      setOtp({ id: hasil.idOtp, tujuan: hasil.tujuan });
     });
   }
 
@@ -47,7 +47,7 @@ export function FormLupaSandi() {
   if (otp) {
     return (
       <form onSubmit={simpan} className="space-y-5 motion-safe:animate-muncul" noValidate>
-        <KolomKode idOtp={otp.id} email={akun.includes("@") ? akun.trim() : "email yang terdaftar"} modeTerminal={otp.modeTerminal} kode={kode} onUbah={setKode} galat={galat.kode} />
+        <KolomKode idOtp={otp.id} email={otp.tujuan} kode={kode} onUbah={setKode} galat={galat.kode} />
         <KolomIsian label="Kata sandi baru" name="sandi" sandi autoComplete="new-password" value={sandi} onChange={(e) => setSandi(e.target.value)} galat={galat.sandi} petunjuk="Minimal 8 karakter, berisi huruf dan angka." />
         <Tombol type="submit" memproses={memproses} disabled={kode.length !== 6} className="w-full py-3 text-base">
           Simpan kata sandi baru

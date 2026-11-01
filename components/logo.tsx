@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { situs } from "@/lib/site";
 
-export function Logo() {
+export function Logo({ terang = false }: { terang?: boolean }) {
   return (
     <Link href="/" className="flex items-center gap-2.5 rounded-lg" aria-label={`${situs.nama}, ke beranda`}>
       <svg viewBox="0 0 32 32" className="size-8 shrink-0" aria-hidden="true">
@@ -19,7 +19,7 @@ export function Logo() {
           strokeLinejoin="round"
         />
       </svg>
-      <span className="text-lg font-extrabold tracking-tight">{situs.nama}</span>
+      <span className={`font-display text-xl font-extrabold tracking-tight ${terang ? "text-white" : ""}`}>{situs.nama}</span>
     </Link>
   );
 }
