@@ -24,14 +24,14 @@ export const metadata: Metadata = { title: "Transparansi" };
 export default function HalamanTransparansi() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
-      <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Transparansi</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Transparansi</h1>
       <p className="mt-2 max-w-2xl text-tinta-redup">
         Kinerja setiap instansi dihitung otomatis dari riwayat laporan, tanpa diisi manual. Siapa pun bisa melihat dan
         membandingkannya.
       </p>
 
       <section className="mt-10">
-        <h2 className="text-xl font-bold">Peta sebaran laporan</h2>
+        <h2 className="text-2xl font-extrabold">Peta sebaran laporan</h2>
         <p className="mt-1 text-sm text-tinta-redup">
           90 hari terakhir. Makin besar lingkaran, makin banyak laporan. Warna menunjukkan porsi laporan yang lewat batas waktu.
         </p>
@@ -48,7 +48,7 @@ export default function HalamanTransparansi() {
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-bold">Rapor instansi</h2>
+        <h2 className="text-2xl font-extrabold">Rapor instansi</h2>
         <div className="mt-4">
           <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>
             <BagianRapor />
@@ -62,7 +62,7 @@ export default function HalamanTransparansi() {
 
       <div className="mt-12 grid gap-10 lg:grid-cols-2">
         <section>
-          <h2 className="text-xl font-bold">Standar waktu layanan</h2>
+          <h2 className="text-2xl font-extrabold">Standar waktu layanan</h2>
           <p className="mt-1 text-sm text-tinta-redup">Berlaku untuk semua daerah, dihitung dalam hari kerja.</p>
           <dl className="mt-5 divide-y divide-garis rounded-2xl border border-garis bg-white">
             <BarisStandar label="Verifikasi oleh admin" nilai={`${SLA_VERIFIKASI_HARI_KERJA} hari kerja`} />
@@ -89,7 +89,7 @@ export default function HalamanTransparansi() {
         </section>
 
         <section>
-          <h2 className="text-xl font-bold">Laporan per bulan</h2>
+          <h2 className="text-2xl font-extrabold">Laporan per bulan</h2>
           <p className="mt-1 text-sm text-tinta-redup">Jumlah laporan baru dari semua daerah.</p>
           <Suspense fallback={<div className="mt-5 h-48 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>
             <BagianBulanan />

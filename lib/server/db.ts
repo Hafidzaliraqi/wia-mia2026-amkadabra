@@ -54,14 +54,19 @@ async function buatKoneksi(): Promise<Koneksi> {
 
 async function siapkan(): Promise<Koneksi> {
   const koneksi = await buatKoneksi();
-  for (const perintah of SKEMA.split(";").map((s) => s.trim()).filter(Boolean)) {
-    await koneksi.kueri(perintah);
-  }
-  const [{ jumlah }] = await koneksi.kueri<{ jumlah: number }>("SELECT count(*)::int AS jumlah FROM laporan");
-  if (jumlah === 0) {
-    const { isiDataContoh } = await import("@/lib/server/benih");
-    await koneksi.transaksi((kueri) => isiDataContoh(kueri));
-  }
+  // Kunci supaya kalau beberapa server menyala bersamaan (di Vercel),
+  // tabel dan data contoh hanya dibuat satu kali
+  await koneksi.transaksi(async (kueri) => {
+    await kueri("SELECT pg_advisory_xact_lock(7240026)");
+    for (const perintah of SKEMA.split(";").map((s) => s.trim()).filter(Boolean)) {
+      await kueri(perintah);
+    }
+    const [{ jumlah }] = await kueri<{ jumlah: number }>("SELECT count(*)::int AS jumlah FROM laporan");
+    if (jumlah === 0) {
+      const { isiDataContoh } = await import("@/lib/server/benih");
+      await isiDataContoh(kueri);
+    }
+  });
   return koneksi;
 }
 

@@ -5,10 +5,10 @@ Tuntasin adalah platform pelaporan warga yang meneruskan laporan ke instansi yan
 ## Tech Stack
 
 - Next.js 16 (App Router, Server Actions, Cache Components) + TypeScript
-- Tailwind CSS 4
+- Tailwind CSS 4, font Bricolage Grotesque, Plus Jakarta Sans, dan JetBrains Mono (ditanam di project)
 - PostgreSQL: PGlite untuk pengembangan lokal, Neon/Supabase saat online
 - Leaflet + OpenStreetMap untuk peta lokasi laporan
-- Nodemailer (SMTP Gmail) untuk kode OTP dan email pemberitahuan
+- Nodemailer (SMTP Gmail) dan Fonnte (WhatsApp, opsional) untuk kode OTP dan pemberitahuan
 - exifr untuk membaca waktu dan lokasi foto (deteksi laporan palsu)
 
 ## Cara Menjalankan
@@ -44,7 +44,11 @@ Semua kata sandi: `demo1234`
 | Petugas SDA Jakarta Selatan | petugas.sda@demo.id |
 | Admin verifikator | admin@demo.id |
 
-Akun warga baru bisa dibuat sendiri lewat halaman Daftar (verifikasi kode OTP email).
+Di halaman Masuk ada tombol **masuk sekali klik** untuk ketiga peran. Akun warga baru bisa dibuat sendiri lewat halaman Daftar (verifikasi kode OTP lewat email).
+
+## Deploy
+
+Website di-deploy ke Vercel dengan database Neon (region Singapura). Variabel lingkungan yang wajib diisi di Vercel: `DATABASE_URL`, `RAHASIA_APLIKASI`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, dan `ALAMAT_SITUS`. Opsional: `FONNTE_TOKEN` supaya kode OTP juga dikirim lewat WhatsApp. Setelah deploy, buka `/api/status` untuk memastikan database dan email sudah siap.
 
 ## Progress
 
@@ -59,6 +63,7 @@ Akun warga baru bisa dibuat sendiri lewat halaman Daftar (verifikasi kode OTP em
 - [x] Dasbor petugas: antrean instansi, terima, kirim kabar, perpanjangan, alihkan, tandai selesai dengan foto
 - [x] Dasbor admin: verifikasi dengan tanda risiko, tolak, tindak lanjut laporan yang ditandai warga, pemantauan tenggat, teguran, akun petugas
 - [x] Tugas otomatis: tutup laporan tanpa konfirmasi 10 hari, eskalasi laporan lewat batas waktu
+- [x] Halaman Tentang & FAQ, masuk sekali klik untuk juri, pratinjau tautan saat dibagikan
 - [ ] Deploy online (Vercel + Neon)
 - [ ] Foto asli untuk laporan contoh
 

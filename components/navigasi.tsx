@@ -36,6 +36,7 @@ const menuAtas = [
   { href: "/", label: "Beranda" },
   { href: "/laporan", label: "Jelajah" },
   { href: "/transparansi", label: "Transparansi" },
+  { href: "/tentang", label: "Tentang" },
   { href: "/riwayat", label: "Riwayat" },
 ];
 
@@ -93,6 +94,12 @@ export function NavAtasTampilan({
   pengguna: PenggunaRingkas | null | undefined;
   notifikasi: DataNotifikasi | null;
 }) {
+  const [tergulir, setTergulir] = useState(false);
+  useEffect(() => {
+    const cek = () => setTergulir(window.scrollY > 8);
+    window.addEventListener("scroll", cek, { passive: true });
+    return () => window.removeEventListener("scroll", cek);
+  }, []);
   const [cariTerbuka, setCariTerbuka] = useState(false);
   const tombolCari = useRef<HTMLButtonElement>(null);
   const [halamanTerakhir, setHalamanTerakhir] = useState(pathname);
@@ -106,13 +113,17 @@ export function NavAtasTampilan({
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-garis bg-white">
+    <header
+      className={`sticky top-0 z-30 border-b border-garis transition-[background-color,box-shadow] duration-300 ${
+        tergulir ? "bg-white/85 shadow-[0_12px_32px_-20px_rgb(19_35_61/0.5)] backdrop-blur-lg" : "bg-white"
+      }`}
+    >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Logo />
 
         <nav aria-label="Menu utama" className="hidden items-center gap-1 lg:flex">
           {(pengguna && pengguna.peran !== "warga"
-            ? [...menuAtas.slice(0, 3), { href: `/${pengguna.peran}`, label: "Dasbor" }]
+            ? [...menuAtas.filter((i) => i.href !== "/riwayat"), { href: `/${pengguna.peran}`, label: "Dasbor" }]
             : menuAtas
           ).map((item) => {
             const aktif = cocok(pathname, item.href);

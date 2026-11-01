@@ -15,7 +15,7 @@ export interface TitikSebaran {
 
 function warna(t: TitikSebaran) {
   const porsi = t.total ? t.terlambat / t.total : 0;
-  return porsi >= 0.25 ? "#b42318" : porsi >= 0.1 ? "#d99a1c" : "#157347";
+  return porsi >= 0.25 ? "#b42318" : porsi >= 0.1 ? "#d99a1c" : "#0a7446";
 }
 
 function PasBatas({ titik }: { titik: TitikSebaran[] }) {

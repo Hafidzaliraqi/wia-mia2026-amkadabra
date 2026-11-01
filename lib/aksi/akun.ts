@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { kueri, transaksi } from "@/lib/server/db";
 import { emailKodeOtp, emailSiap, kirimEmail } from "@/lib/server/email";
+import { kirimWa, waSiap } from "@/lib/server/whatsapp";
 import { ambilOtp, buatKode, JEDA_KIRIM_ULANG_DETIK, MASA_BERLAKU_MENIT, periksaKode, simpanOtp } from "@/lib/server/otp";
 import { cocokSandi, hashSandi, hashToken } from "@/lib/server/sandi";
 import { buatSesi, hapusSesi, penggunaSaatIni } from "@/lib/server/sesi";
@@ -19,9 +20,35 @@ function tujuanSetelahMasuk(peran: string, lanjut: string | null) {
   return tujuanAman(lanjut);
 }
 
-async function kirimKode(email: string, nama: string, kode: string, keperluan: string) {
-  const { teks, html } = emailKodeOtp(nama, kode, keperluan);
-  await kirimEmail(email, `Kode ${keperluan}: ${kode}`, teks, html);
+const samarkanHp = (hp: string) => `${hp.slice(0, 4)}••••${hp.slice(-3)}`;
+
+// Kirim kode lewat semua saluran yang sudah diatur: WhatsApp (Fonnte) dan email (SMTP).
+// Mengembalikan keterangan tujuan untuk ditampilkan ke pengguna.
+async function kirimKode(email: string, hp: string | null, nama: string, kode: string, keperluan: string): Promise<string> {
+  const tujuan: string[] = [];
+  const galat: unknown[] = [];
+  if (waSiap() && hp) {
+    try {
+      await kirimWa(hp, `Kode ${keperluan} Tuntasin: *${kode}*\n\nBerlaku 10 menit. Jangan berikan kode ini kepada siapa pun, termasuk yang mengaku petugas.`);
+      tujuan.push(`WhatsApp ${samarkanHp(hp)}`);
+    } catch (e) {
+      galat.push(e);
+    }
+  }
+  if (emailSiap() || process.env.NODE_ENV !== "production") {
+    try {
+      const { teks, html } = emailKodeOtp(nama, kode, keperluan);
+      await kirimEmail(email, `Kode ${keperluan}: ${kode}`, teks, html);
+      tujuan.push(email);
+    } catch (e) {
+      galat.push(e);
+    }
+  }
+  if (tujuan.length === 0) {
+    console.error("Kode verifikasi gagal dikirim:", ...galat);
+    throw new Error("Belum ada saluran pengiriman kode yang berhasil (atur SMTP_* atau FONNTE_TOKEN).");
+  }
+  return tujuan.join(" dan ");
 }
 
 // ---------------- daftar ----------------
@@ -31,7 +58,7 @@ export async function mulaiDaftar(data: {
   email: string;
   hp: string;
   sandi: string;
-}): Promise<HasilAksi<{ idOtp: string; email: string; modeTerminal: boolean }>> {
+}): Promise<HasilAksi<{ idOtp: string; email: string }>> {
   const nama = data.nama.trim();
   const email = data.email.trim().toLowerCase();
   const hp = rapikanHp(data.hp);
@@ -56,13 +83,14 @@ export async function mulaiDaftar(data: {
     { tujuan: "daftar", email, data: { nama, email, hp, hashSandi: await hashSandi(data.sandi) } },
     kode,
   );
+  let tujuan: string;
   try {
-    await kirimKode(email, nama, kode, "verifikasi akun");
+    tujuan = await kirimKode(email, hp, nama, kode, "verifikasi akun");
   } catch (galatKirim) {
     console.error(galatKirim);
-    return gagal("Email verifikasi gagal dikirim. Coba beberapa saat lagi.");
+    return gagal("Kode verifikasi gagal dikirim. Coba beberapa saat lagi.");
   }
-  return { ok: true, idOtp, email, modeTerminal: !emailSiap() };
+  return { ok: true, idOtp, email: tujuan };
 }
 
 export async function verifikasiDaftar(idOtp: string, kode: string, lanjut: string | null): Promise<HasilAksi<{ tujuan: string; nama: string }>> {
@@ -99,7 +127,12 @@ export async function kirimUlangKode(idOtp: string): Promise<HasilAksi<{ jeda: n
     [otp.id, hashToken(kode)],
   );
   const nama = otp.data?.nama ?? "kamu";
-  await kirimKode(otp.email, nama, kode, otp.tujuan === "daftar" ? "verifikasi akun" : "atur ulang kata sandi");
+  const hp = (otp.data as { hp?: string } | null)?.hp ?? null;
+  try {
+    await kirimKode(otp.email, hp, nama, kode, otp.tujuan === "daftar" ? "verifikasi akun" : "atur ulang kata sandi");
+  } catch {
+    return gagal("Kode gagal dikirim. Coba beberapa saat lagi.");
+  }
   return { ok: true, jeda: JEDA_KIRIM_ULANG_DETIK };
 }
 
@@ -143,6 +176,19 @@ export async function masuk(akun: string, sandi: string, lanjut: string | null):
   return { ok: true, tujuan: tujuanSetelahMasuk(baris.peran, lanjut), nama: baris.nama };
 }
 
+// Masuk sekali klik ke akun demo, supaya juri bisa mencoba tanpa daftar
+const AKUN_DEMO = { warga: "warga@demo.id", petugas: "petugas.dpu@demo.id", admin: "admin@demo.id" } as const;
+
+export async function masukDemo(peran: keyof typeof AKUN_DEMO): Promise<HasilAksi<{ tujuan: string; nama: string }>> {
+  const email = AKUN_DEMO[peran];
+  if (!email) return gagal("Akun demo tidak dikenal.");
+  const [baris] = await kueri<{ id: string; nama: string; peran: string }>("SELECT id, nama, peran FROM pengguna WHERE email = $1", [email]);
+  if (!baris) return gagal("Akun demo belum tersedia.");
+  await kueri("UPDATE pengguna SET gagal_masuk = 0, terkunci_sampai = NULL WHERE id = $1", [baris.id]);
+  await buatSesi(baris.id);
+  return { ok: true, tujuan: tujuanSetelahMasuk(baris.peran, null), nama: baris.nama };
+}
+
 export async function keluar(): Promise<HasilAksi> {
   await hapusSesi();
   return { ok: true };
@@ -150,25 +196,26 @@ export async function keluar(): Promise<HasilAksi> {
 
 // ---------------- lupa kata sandi ----------------
 
-export async function mintaAturSandi(akun: string): Promise<HasilAksi<{ idOtp: string; modeTerminal: boolean }>> {
+export async function mintaAturSandi(akun: string): Promise<HasilAksi<{ idOtp: string; tujuan: string }>> {
   const masukan = akun.trim().toLowerCase();
   if (!masukan) return gagal("Isi email atau nomor HP yang terdaftar.");
-  const [baris] = await kueri<{ id: string; nama: string; email: string }>(
-    "SELECT id, nama, email FROM pengguna WHERE email = $1 OR hp = $2",
+  const [baris] = await kueri<{ id: string; nama: string; email: string; hp: string }>(
+    "SELECT id, nama, email, hp FROM pengguna WHERE email = $1 OR hp = $2",
     [masukan, rapikanHp(masukan)],
   );
   // Jawaban sama walau akun tidak ada, supaya orang tidak bisa menebak email terdaftar
-  if (!baris) return { ok: true, idOtp: randomUUID(), modeTerminal: !emailSiap() };
+  if (!baris) return { ok: true, idOtp: randomUUID(), tujuan: "email atau WhatsApp yang terdaftar" };
 
   const kode = buatKode();
-  const idOtp = await simpanOtp(kueri, { tujuan: "atur_sandi", email: baris.email, penggunaId: baris.id, data: { nama: baris.nama } }, kode);
+  const idOtp = await simpanOtp(kueri, { tujuan: "atur_sandi", email: baris.email, penggunaId: baris.id, data: { nama: baris.nama, hp: baris.hp } }, kode);
+  let tujuan: string;
   try {
-    await kirimKode(baris.email, baris.nama, kode, "atur ulang kata sandi");
+    tujuan = await kirimKode(baris.email, baris.hp, baris.nama, kode, "atur ulang kata sandi");
   } catch (galatKirim) {
     console.error(galatKirim);
-    return gagal("Email gagal dikirim. Coba beberapa saat lagi.");
+    return gagal("Kode gagal dikirim. Coba beberapa saat lagi.");
   }
-  return { ok: true, idOtp, modeTerminal: !emailSiap() };
+  return { ok: true, idOtp, tujuan };
 }
 
 export async function aturSandiBaru(idOtp: string, kode: string, sandiBaru: string): Promise<HasilAksi<{ tujuan: string }>> {

@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Jelajah laporan" };
 export default function HalamanJelajah() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
-      <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Jelajah laporan</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Jelajah laporan</h1>
       <p className="mt-2 max-w-2xl text-tinta-redup">
         Laporan warga dari berbagai daerah beserta status dan batas waktunya. Laporan yang dibuat privat oleh pelapor
         tidak ditampilkan.

@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Notifikasi" };
 export default function HalamanNotifikasi() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:py-10">
-      <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Notifikasi</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Notifikasi</h1>
       <div className="mt-8">
         <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>
           <IsiNotifikasi />

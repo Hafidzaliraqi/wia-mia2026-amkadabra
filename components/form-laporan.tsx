@@ -302,7 +302,7 @@ export function FormLaporan({
           </span>
           <h2 className="mt-5 text-2xl font-extrabold tracking-tight">Laporan terkirim</h2>
           <p className="mt-1 text-tinta-redup">Simpan nomor ini untuk melacak laporanmu.</p>
-          <p className="angka mt-5 rounded-xl bg-kertas px-4 py-3 text-2xl font-extrabold tracking-wide">{terkirim}</p>
+          <p className="kode mt-5 rounded-xl bg-kertas px-4 py-3 text-2xl font-bold">{terkirim}</p>
           <ol className="mt-6 space-y-4 text-sm">
             <LangkahBerikut nomor={1} judul="Diverifikasi admin" isi={`Paling lambat ${batasVerifikasiTeks} WIB.`} />
             <LangkahBerikut nomor={2} judul={`Diteruskan ke ${instansi?.nama ?? "instansi terkait"}`} isi="Otomatis setelah lolos verifikasi." />

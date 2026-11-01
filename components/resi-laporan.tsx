@@ -19,7 +19,7 @@ export function ResiLaporan({ laporan }: { laporan: Laporan }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold text-tinta-redup">Nomor laporan</p>
-            <p className="angka text-2xl font-extrabold tracking-wide whitespace-nowrap">{laporan.nomor}</p>
+            <p className="kode text-2xl font-bold whitespace-nowrap">{laporan.nomor}</p>
           </div>
           <StatusBadge status={status} />
         </div>

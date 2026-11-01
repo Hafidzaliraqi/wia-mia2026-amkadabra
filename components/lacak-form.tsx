@@ -49,8 +49,7 @@ export function LacakForm({ contoh }: { contoh: string }) {
       <p id="petunjuk-lacak" className={`mt-2 text-sm ${pesan ? "text-bahaya" : "text-tinta-redup"}`}>
         {pesan ?? (
           <>
-            Nomor laporan ada di email konfirmasi, contoh:{" "}
-            <span className="angka whitespace-nowrap">{contoh}</span>
+            Contoh: <span className="kode whitespace-nowrap">{contoh}</span>
           </>
         )}
       </p>

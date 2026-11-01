@@ -47,11 +47,11 @@ function aman(teks: string) {
 }
 
 function bingkai(judul: string, isi: string) {
-  return `<!doctype html><html><body style="margin:0;background:#f3f5f7;font-family:Arial,sans-serif;color:#13233d">
-<div style="max-width:480px;margin:24px auto;background:#fff;border:1px solid #d8dee6;border-radius:16px;padding:28px">
+  return `<!doctype html><html><body style="margin:0;background:#f6f5f0;font-family:Arial,sans-serif;color:#0f1b2d">
+<div style="max-width:480px;margin:24px auto;background:#fff;border:1px solid #e2e0d8;border-radius:16px;padding:28px">
 <p style="margin:0 0 16px;font-weight:800;font-size:18px">${situs.nama}</p>
 <h1 style="margin:0 0 12px;font-size:20px">${aman(judul)}</h1>${isi}
-<p style="margin:24px 0 0;font-size:12px;color:#4a5a72">Email ini dikirim otomatis. Jangan bagikan kode atau tautan di email ini kepada siapa pun, termasuk yang mengaku petugas.</p>
+<p style="margin:24px 0 0;font-size:12px;color:#4f5d73">Email ini dikirim otomatis. Jangan bagikan kode atau tautan di email ini kepada siapa pun, termasuk yang mengaku petugas.</p>
 </div></body></html>`;
 }
 
@@ -61,7 +61,7 @@ export function emailKodeOtp(nama: string, kode: string, keperluan: string) {
     `Kode ${keperluan}`,
     `<p style="margin:0 0 16px;line-height:1.6">Halo ${aman(nama)}, masukkan kode ini untuk melanjutkan:</p>
 <p style="margin:0;font-size:32px;font-weight:800;letter-spacing:8px">${kode}</p>
-<p style="margin:16px 0 0;color:#4a5a72">Kode berlaku 10 menit.</p>`,
+<p style="margin:16px 0 0;color:#4f5d73">Kode berlaku 10 menit.</p>`,
   );
   return { teks, html };
 }
@@ -72,7 +72,7 @@ export function emailPemberitahuan(nama: string, judul: string, isi: string, tau
   const html = bingkai(
     judul,
     `<p style="margin:0 0 20px;line-height:1.6">Halo ${aman(nama)}, ${aman(isi)}</p>
-<a href="${alamat}" style="display:inline-block;background:#1f4fa8;color:#fff;text-decoration:none;padding:12px 20px;border-radius:12px;font-weight:700">Lihat laporan</a>`,
+<a href="${alamat}" style="display:inline-block;background:#1e48d4;color:#fff;text-decoration:none;padding:12px 20px;border-radius:12px;font-weight:700">Lihat laporan</a>`,
   );
   return { teks, html };
 }

@@ -14,7 +14,7 @@ export interface Titik {
 const ikonPin = L.divIcon({
   className: "",
   html: `<svg width="36" height="44" viewBox="0 0 36 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path d="M18 1C8.6 1 1 8.4 1 17.6 1 29.4 15.2 41.6 16.8 43a1.8 1.8 0 0 0 2.4 0C20.8 41.6 35 29.4 35 17.6 35 8.4 27.4 1 18 1z" fill="#1f4fa8" stroke="white" stroke-width="2"/>
+    <path d="M18 1C8.6 1 1 8.4 1 17.6 1 29.4 15.2 41.6 16.8 43a1.8 1.8 0 0 0 2.4 0C20.8 41.6 35 29.4 35 17.6 35 8.4 27.4 1 18 1z" fill="#1e48d4" stroke="white" stroke-width="2"/>
     <circle cx="18" cy="17.5" r="6" fill="white"/>
   </svg>`,
   iconSize: [36, 44],
