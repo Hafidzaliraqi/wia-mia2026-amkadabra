@@ -1,5 +1,6 @@
 import type { Instansi, Laporan } from "@/lib/types";
-import { cariKategori, daftarInstansi } from "@/lib/data/referensi";
+import { cariKategori, daftarInstansi, daftarKelompok } from "@/lib/data/referensi";
+import { tingkatSaatIni } from "@/lib/eskalasi";
 import { apakahTerlambat, hitungStatus } from "@/lib/sla";
 import { namaKota } from "@/lib/wilayah";
 import { HARI, JAM, formatBulan, sekarang, tambahHariKerja } from "@/lib/waktu";
@@ -123,4 +124,66 @@ export function laporanPerBulan(semua: Laporan[], jumlahBulan = 3) {
     hasil.push({ bulan: formatBulan(new Date(awal + 7 * JAM)), total });
   }
   return hasil;
+}
+
+// ================================================================
+// METRIK PUBLIK untuk halaman Transparansi (bisa difilter per daerah)
+// ================================================================
+export function metrikPublik(semua: Laporan[], kotaId?: string) {
+  const kini = sekarang().getTime();
+  const wilayah = kotaId ? semua.filter((l) => l.kotaId === kotaId) : semua;
+  const jendela = wilayah.filter((l) => kini - Date.parse(l.dibuatPada) <= 90 * HARI);
+  const pertama = (l: Laporan, jenis: string) => l.riwayat.find((k) => k.jenis === jenis)?.waktu;
+  const terakhirJenis = (l: Laporan, jenis: string[]) => [...l.riwayat].reverse().find((k) => jenis.includes(k.jenis))?.waktu;
+  const rata = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
+
+  const terverifikasi = jendela.filter((l) => pertama(l, "diteruskan"));
+  const tuntas = terverifikasi.filter((l) => ["selesai", "ditutup_otomatis"].includes(hitungStatus(l)));
+  const dikonfirmasi = tuntas.filter((l) => hitungStatus(l) === "selesai");
+  const hariSelesai = tuntas
+    .map((l) => terakhirJenis(l, ["ditandai_selesai"]))
+    .map((w, i) => (w ? (Date.parse(w) - Date.parse(tuntas[i].dibuatPada)) / HARI : null))
+    .filter((x): x is number => x !== null);
+  const jamRespons = terverifikasi
+    .map((l) => {
+      const a = pertama(l, "diteruskan");
+      const b = pertama(l, "diproses");
+      return a && b ? (Date.parse(b) - Date.parse(a)) / 3_600_000 : null;
+    })
+    .filter((x): x is number => x !== null);
+  const tanpaEskalasi = tuntas.filter((l) => !l.riwayat.some((k) => k.jenis === "eskalasi" && k.aktor === "Sistem"));
+
+  const aktif = wilayah.filter((l) => ["terkirim", "diteruskan", "diproses"].includes(hitungStatus(l)));
+  const eskalasi = [1, 2, 3].map((t) => aktif.filter((l) => tingkatSaatIni(l) === t).length);
+
+  const MINGGU = 7 * HARI;
+  const mingguan = Array.from({ length: 12 }, (_, i) => {
+    const awal = kini - (12 - i) * MINGGU;
+    const akhir = awal + MINGGU;
+    const dalam = (w?: string) => !!w && Date.parse(w) >= awal && Date.parse(w) < akhir;
+    return {
+      awal: new Date(awal).toISOString(),
+      masuk: wilayah.filter((l) => dalam(l.dibuatPada)).length,
+      tuntas: wilayah.filter((l) => dalam(terakhirJenis(l, ["dikonfirmasi_beres", "ditutup_otomatis"]))).length,
+    };
+  });
+
+  const perKelompok = daftarKelompok.map((g) => {
+    const milik = terverifikasi.filter((l) => cariKategori(l.kategoriId).kelompok === g.id);
+    const selesai = milik.filter((l) => ["selesai", "ditutup_otomatis"].includes(hitungStatus(l))).length;
+    return { id: g.id, nama: g.nama, masuk: milik.length, persenTuntas: milik.length ? Math.round((selesai / milik.length) * 100) : null };
+  });
+
+  return {
+    masuk: jendela.length,
+    terverifikasi: terverifikasi.length,
+    persenTuntas: terverifikasi.length ? Math.round((tuntas.length / terverifikasi.length) * 100) : null,
+    persenDikonfirmasi: tuntas.length ? Math.round((dikonfirmasi.length / tuntas.length) * 100) : null,
+    rataHariSelesai: rata(hariSelesai),
+    rataJamRespons: rata(jamRespons),
+    persenTanpaEskalasi: tuntas.length ? Math.round((tanpaEskalasi.length / tuntas.length) * 100) : null,
+    eskalasi,
+    mingguan,
+    perKelompok,
+  };
 }

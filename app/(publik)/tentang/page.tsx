@@ -80,11 +80,11 @@ const faq = [
   },
   {
     t: "Bagaimana kalau instansi tidak merespons?",
-    j: "Setiap tahap punya batas waktu yang terlihat semua orang. Kalau lewat, laporan diberi tanda Lewat batas waktu, dieskalasi otomatis ke pengawas, dan admin bisa mengirim teguran resmi. Semua tercatat di riwayat dan memengaruhi rapor instansi di halaman Transparansi.",
+    j: "Setiap tahap punya batas waktu yang terlihat semua orang. Kalau lewat, laporan naik otomatis ke pimpinan instansi, 3 hari kerja kemudian ke inspektorat, lalu 5 hari kerja kemudian ke kepala daerah. Admin juga bisa mengirim teguran resmi. Semua tercatat di riwayat dan memengaruhi rapor instansi.",
   },
   {
     t: "Laporanku ditandai selesai, tapi masalahnya belum beres.",
-    j: "Pilih Belum beres dan tulis alasannya. Laporan dibuka kembali ke instansi dengan tenggat baru.",
+    j: "Pilih Belum beres dan tulis alasannya. Laporan dibuka kembali ke instansi dengan tenggat baru. Kalau sampai dua kali dinyatakan belum beres, laporan otomatis naik ke pimpinan instansi.",
   },
   {
     t: "Bagaimana kalau aku tidak sempat mengonfirmasi?",

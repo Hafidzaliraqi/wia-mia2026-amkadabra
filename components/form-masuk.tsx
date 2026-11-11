@@ -43,7 +43,13 @@ export function FormMasuk() {
           <KeyRound className="size-4 text-rambu" aria-hidden="true" />
           Coba tanpa daftar
         </p>
-        <p className="mt-1 text-sm text-tinta-redup">Masuk sekali klik ke akun demo.</p>
+        <p className="mt-1 text-sm text-tinta-redup">
+          Masuk sekali klik ke akun demo, atau{" "}
+          <Link href="/demo" className="font-semibold text-rambu hover:text-rambu-tua">
+            jalankan simulasi alur lengkap
+          </Link>
+          .
+        </p>
         <div className="mt-3 grid grid-cols-3 gap-2">
           {(["warga", "petugas", "admin"] as const).map((peran) => (
             <button

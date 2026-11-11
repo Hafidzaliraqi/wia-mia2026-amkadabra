@@ -15,6 +15,8 @@ import { AksiWarga } from "@/components/aksi-warga";
 import { Percakapan } from "@/components/percakapan";
 import { PenyegarOtomatis } from "@/components/penyegar-otomatis";
 import { TombolBagikan } from "@/components/tombol-bagikan";
+import { TanggaEskalasi } from "@/components/tangga-eskalasi";
+import { BarAksiSeluler } from "@/components/bar-aksi-seluler";
 import { susunPercakapan } from "@/lib/server/percakapan";
 import { FotoLaporanTampil } from "@/components/foto-contoh";
 import { KategoriIkon } from "@/components/kategori-ikon";
@@ -83,6 +85,16 @@ async function IsiDetail({ params }: Pick<PageProps<"/laporan/[id]">, "params">)
   const masihBisaBukaUlang =
     ditutupOtomatis && sekarang().getTime() - new Date(ditutupOtomatis.waktu).getTime() < BATAS_BUKA_ULANG_HARI * HARI;
   const masihBerjalan = ["terkirim", "diteruskan", "diproses", "menunggu_konfirmasi"].includes(status);
+  const modeBar: "konfirmasi" | "dukung" | "masuk" | null =
+    status === "menunggu_konfirmasi" && berhak && pengguna?.peran === "warga"
+      ? "konfirmasi"
+      : masihBerjalan && laporan.visibilitas !== "privat" && !laporanSendiri
+        ? pengguna === null
+          ? "masuk"
+          : pengguna.peran === "warga"
+            ? "dukung"
+            : null
+        : null;
   const fotoAwal = laporan.foto.filter((f) => f.jenis === "awal");
   const fotoSesudah = laporan.foto.filter((f) => f.jenis === "sesudah");
   const bisaKelola =
@@ -149,6 +161,7 @@ async function IsiDetail({ params }: Pick<PageProps<"/laporan/[id]">, "params">)
               </Link>
             )}
             {status === "menunggu_konfirmasi" && tenggat && (
+              <div id="konfirmasi" className="scroll-mt-24">
               <PanelKonfirmasi
                 nomor={laporan.nomor}
                 instansiNama={instansi.nama}
@@ -156,6 +169,7 @@ async function IsiDetail({ params }: Pick<PageProps<"/laporan/[id]">, "params">)
                 sudahMasuk={pengguna !== null}
                 berhak={berhak && pengguna?.peran === "warga"}
               />
+              </div>
             )}
             {tenggat && tenggat.tanggungJawabPetugas && (
               <section className="rounded-2xl border border-garis bg-white p-5">
@@ -163,13 +177,9 @@ async function IsiDetail({ params }: Pick<PageProps<"/laporan/[id]">, "params">)
                 <div className="mt-4">
                   <InfoTenggat tenggat={tenggat} />
                 </div>
-                {terlambat && (
-                  <p className="mt-4 text-sm leading-relaxed text-bahaya">
-                    Batas waktu sudah lewat. Laporan ini otomatis dieskalasi ke pengawas instansi.
-                  </p>
-                )}
               </section>
             )}
+            <TanggaEskalasi laporan={laporan} />
             {status === "ditutup_otomatis" && ditutupOtomatis && (
               <section className="rounded-2xl border border-garis bg-white p-5 text-sm leading-relaxed">
                 <h2 className="font-bold">Ditutup tanpa konfirmasi</h2>
@@ -294,6 +304,12 @@ async function IsiDetail({ params }: Pick<PageProps<"/laporan/[id]">, "params">)
           </section>
         </aside>
       </div>
+      {modeBar && (
+        <>
+          <div aria-hidden="true" className="h-24 lg:hidden" />
+          <BarAksiSeluler nomor={laporan.nomor} mode={modeBar} jumlah={laporan.dukungan} didukung={didukung} />
+        </>
+      )}
     </>
   );
 }
