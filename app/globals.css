@@ -39,6 +39,7 @@
   --animate-alir: alir 1.1s linear infinite;
   --animate-gores: gores 1.1s cubic-bezier(0.65, 0, 0.35, 1) 0.6s both;
   --animate-radar: radar 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-naik: naik 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 
   @keyframes muncul {
     from { opacity: 0; transform: translateY(6px); }
@@ -89,6 +90,10 @@
   @keyframes gores {
     from { stroke-dashoffset: 420; }
     to { stroke-dashoffset: 0; }
+  }
+  @keyframes naik {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
   }
   @keyframes radar {
     from { transform: scale(0.2); opacity: 0.7; }

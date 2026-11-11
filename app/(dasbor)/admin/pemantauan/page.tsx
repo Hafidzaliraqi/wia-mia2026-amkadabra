@@ -4,7 +4,8 @@ import { connection } from "next/server";
 import { ambilSemuaLaporan } from "@/lib/server/laporan";
 import { keItemKerja } from "@/lib/server/kerja";
 import { cariInstansi } from "@/lib/data/referensi";
-import { apakahTerlambat, hitungTenggat } from "@/lib/sla";
+import { apakahTerlambat } from "@/lib/sla";
+import { tingkatSaatIni } from "@/lib/eskalasi";
 import { DaftarKerja } from "@/components/dasbor/daftar-kerja";
 
 export const metadata: Metadata = { title: "Pemantauan tenggat" };
@@ -13,7 +14,7 @@ export default function HalamanPemantauan() {
   return (
     <div className="mx-auto max-w-6xl">
       <h1 className="text-3xl font-extrabold tracking-tight">Pemantauan tenggat</h1>
-      <p className="mt-1 text-tinta-redup">Laporan yang lewat batas waktu, dikelompokkan per tahap. Buka laporan untuk mengirim teguran.</p>
+      <p className="mt-1 text-tinta-redup">Laporan yang lewat batas waktu, dikelompokkan per tingkat eskalasi. Buka laporan untuk mengirim teguran.</p>
       <Suspense fallback={<div className="mt-6 h-96 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>
         <IsiPemantauan />
       </Suspense>
@@ -29,10 +30,7 @@ async function IsiPemantauan() {
   const peringkat = [...perInstansi.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
   const maks = Math.max(...peringkat.map(([, n]) => n), 1);
 
-  const item = terlambat.map((l) => {
-    const tahap = hitungTenggat(l)?.tahap ?? "";
-    return keItemKerja(l, ["semua", tahap === "Verifikasi laporan" ? "verifikasi" : tahap === "Respons awal instansi" ? "respons" : "penyelesaian"]);
-  });
+  const item = terlambat.map((l) => keItemKerja(l, ["semua", `tingkat-${Math.max(1, tingkatSaatIni(l))}`]));
 
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
@@ -42,9 +40,9 @@ async function IsiPemantauan() {
         kosong="Tidak ada laporan yang lewat batas waktu."
         tab={[
           { id: "semua", label: "Semua" },
-          { id: "verifikasi", label: "Verifikasi" },
-          { id: "respons", label: "Respons awal" },
-          { id: "penyelesaian", label: "Penyelesaian" },
+          { id: "tingkat-1", label: "Pimpinan instansi" },
+          { id: "tingkat-2", label: "Inspektorat" },
+          { id: "tingkat-3", label: "Kepala daerah" },
         ]}
       />
       <section className="rounded-2xl border border-garis bg-white p-5">

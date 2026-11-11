@@ -62,7 +62,12 @@ Website di-deploy ke Vercel dengan database Neon (region Singapura). Variabel li
 - [x] Transparansi: peta sebaran laporan, rapor instansi per daerah, dan standar waktu layanan
 - [x] Dasbor petugas: antrean instansi, terima, kirim kabar, perpanjangan, alihkan, tandai selesai dengan foto
 - [x] Dasbor admin: verifikasi dengan tanda risiko, tolak, tindak lanjut laporan yang ditandai warga, pemantauan tenggat, teguran, akun petugas
-- [x] Tugas otomatis: tutup laporan tanpa konfirmasi 10 hari, eskalasi laporan lewat batas waktu
+- [x] Tugas otomatis: tutup laporan tanpa konfirmasi 10 hari
+- [x] Eskalasi berjenjang otomatis: pimpinan instansi, inspektorat, lalu kepala daerah; juga saat warga menolak hasil 2 kali
+- [x] Dasbor publik real-time di Transparansi: persen tuntas, rata-rata penyelesaian, respons awal, tren mingguan, filter daerah
+- [x] Data terbuka: unduh semua laporan publik dalam CSV (`/api/data/laporan`)
+- [x] Simulasi alur untuk presentasi (`/demo`) dengan log integrasi webhook
+- [x] Tombol aksi utama menempel di bawah layar HP (konfirmasi, dukung, lanjut formulir)
 - [x] Halaman Tentang & FAQ, masuk sekali klik untuk juri, pratinjau tautan saat dibagikan
 - [ ] Deploy online (Vercel + Neon)
 - [ ] Foto asli untuk laporan contoh

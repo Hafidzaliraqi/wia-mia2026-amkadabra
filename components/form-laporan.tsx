@@ -739,7 +739,7 @@ export function FormLaporan({
           </p>
         )}
 
-        <div className="mt-7 flex items-center justify-between gap-3 border-t border-garis pt-5">
+        <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 -mx-5 mt-7 flex items-center justify-between gap-3 border-t border-garis bg-white/95 px-5 py-3 backdrop-blur sm:-mx-7 sm:px-7 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pt-5 lg:pb-0 lg:backdrop-blur-none">
           {langkah > 0 ? (
             <Tombol varian="hantu" onClick={() => pindah(langkah - 1)} disabled={mengirim}>
               <ArrowLeft className="size-4" aria-hidden="true" />

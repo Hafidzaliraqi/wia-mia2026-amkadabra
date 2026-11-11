@@ -108,4 +108,8 @@ CREATE TABLE IF NOT EXISTS notifikasi (
   dibuat_pada timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS notifikasi_pengguna ON notifikasi (pengguna_id, dibaca);
+
+-- Tambahan untuk eskalasi berjenjang dan simulasi presentasi
+ALTER TABLE kejadian ADD COLUMN IF NOT EXISTS tingkat smallint;
+ALTER TABLE laporan ADD COLUMN IF NOT EXISTS simulasi boolean NOT NULL DEFAULT false;
 `;

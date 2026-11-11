@@ -6,6 +6,7 @@ import { kueri, transaksi } from "@/lib/server/db";
 import { ambilLaporan } from "@/lib/server/laporan";
 import { beritahu } from "@/lib/server/notifikasi";
 import { BATAS_BUKA_ULANG_HARI, cariKategori, instansiTujuan, kategoriValid } from "@/lib/data/referensi";
+import { BATAS_PENOLAKAN_WARGA, tanggaEskalasi } from "@/lib/eskalasi";
 import { hitungStatus } from "@/lib/sla";
 import { situs } from "@/lib/site";
 import { cariKota, kecamatanValid } from "@/lib/wilayah";
@@ -150,6 +151,9 @@ export async function konfirmasiPenyelesaian(nomor: string, hasil: "beres" | "be
   const catatan = alasan.trim();
   if (hasil === "belum" && catatan.length < 10) return gagal("Tulis minimal 10 karakter tentang bagian yang belum beres.");
 
+  const jumlahPenolakan = laporan.riwayat.filter((k) => k.jenis === "dibuka_ulang").length + (hasil === "belum" ? 1 : 0);
+  const tingkatPenolakan = hasil === "belum" && jumlahPenolakan >= BATAS_PENOLAKAN_WARGA ? Math.min(3, jumlahPenolakan - 1) : 0;
+
   await transaksi(async (k) => {
     await k("INSERT INTO kejadian (nomor, jenis, aktor, aktor_id, catatan) VALUES ($1, $2, $3, $4, $5)", [
       nomor,
@@ -166,6 +170,12 @@ export async function konfirmasiPenyelesaian(nomor: string, hasil: "beres" | "be
         : { judul: "Laporan dibuka ulang", isi: `${aktor}: "${catatan.slice(0, 120)}"` },
       { warga: true, petugas: true, kecuali: pengguna.id },
     );
+    if (tingkatPenolakan > 0) {
+      const tujuan = tanggaEskalasi(laporan)[tingkatPenolakan].nama;
+      const isi = `Warga menyatakan belum beres ${jumlahPenolakan} kali. Dieskalasi ke ${tujuan}.`;
+      await k("INSERT INTO kejadian (nomor, jenis, aktor, catatan, tingkat) VALUES ($1, 'eskalasi', 'Sistem', $2, $3)", [nomor, isi, tingkatPenolakan]);
+      await beritahu(k, nomor, { judul: "Laporan dieskalasi", isi }, { warga: true, petugas: true });
+    }
   });
   refresh();
   return { ok: true };

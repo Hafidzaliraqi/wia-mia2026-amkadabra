@@ -81,6 +81,7 @@ export interface Kejadian {
   catatan?: string;
   batasBaru?: string; // khusus "perpanjangan"
   aktorId?: string; // akun yang melakukan (kalau ada)
+  tingkat?: number; // khusus "eskalasi": 1 pimpinan instansi, 2 inspektorat, 3 kepala daerah
 }
 
 export type Visibilitas = "publik" | "sembunyikan_nama" | "privat";

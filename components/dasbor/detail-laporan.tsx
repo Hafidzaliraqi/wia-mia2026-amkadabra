@@ -11,6 +11,7 @@ import { LangkahStatus } from "@/components/langkah-status";
 import { RiwayatLaporan } from "@/components/riwayat-laporan";
 import { StatusBadge, TerlambatBadge } from "@/components/status-badge";
 import { InfoTenggat } from "@/components/tenggat";
+import { TanggaEskalasi } from "@/components/tangga-eskalasi";
 
 // Tampilan laporan di dasbor: isi lengkap di kiri, panel tindakan di kanan
 export function DetailLaporanDasbor({
@@ -105,7 +106,7 @@ export function DetailLaporanDasbor({
             </div>
           </section>
         </div>
-        <aside className="space-y-6 lg:sticky lg:top-6">
+        <aside id="panel-tindakan" className="scroll-mt-20 space-y-6 lg:sticky lg:top-6">
           {tenggat && (
             <section className="rounded-2xl border border-garis bg-white p-5">
               <h2 className="font-bold">Tenggat saat ini</h2>
@@ -114,9 +115,16 @@ export function DetailLaporanDasbor({
               </div>
             </section>
           )}
+          <TanggaEskalasi laporan={laporan} />
           {panel}
         </aside>
       </div>
+      <a
+        href="#panel-tindakan"
+        className="fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-30 rounded-full bg-rambu px-5 py-3.5 font-bold text-white shadow-xl shadow-rambu/30 lg:hidden"
+      >
+        Tindakan
+      </a>
     </div>
   );
 }

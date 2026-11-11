@@ -4,6 +4,7 @@ import type { FotoLaporan, JenisKejadian, Kejadian, KategoriId, Laporan, Ringkas
 import { kueri, transaksi } from "@/lib/server/db";
 import { beritahu } from "@/lib/server/notifikasi";
 import { cariInstansi, cariKategori } from "@/lib/data/referensi";
+import { eskalasiJatuhTempo } from "@/lib/eskalasi";
 import { apakahTerlambat, hitungStatus, hitungTenggat } from "@/lib/sla";
 import { labelStatus } from "@/lib/status";
 import { namaKota } from "@/lib/wilayah";
@@ -23,7 +24,7 @@ async function muatLaporan(nomor?: string): Promise<Laporan[]> {
       parameter,
     ),
     kueri(
-      `SELECT nomor, jenis, waktu, aktor, aktor_id, catatan, batas_baru FROM kejadian ${nomor ? "WHERE nomor = $1" : ""} ORDER BY waktu, id`,
+      `SELECT nomor, jenis, waktu, aktor, aktor_id, catatan, batas_baru, tingkat FROM kejadian ${nomor ? "WHERE nomor = $1" : ""} ORDER BY waktu, id`,
       parameter,
     ),
     kueri(
@@ -42,6 +43,7 @@ async function muatLaporan(nomor?: string): Promise<Laporan[]> {
       ...(k.catatan ? { catatan: k.catatan as string } : {}),
       ...(k.batas_baru ? { batasBaru: iso(k.batas_baru) } : {}),
       ...(k.aktor_id ? { aktorId: String(k.aktor_id) } : {}),
+      ...(k.tingkat !== null && k.tingkat !== undefined ? { tingkat: Number(k.tingkat) } : {}),
     });
     riwayatPer.set(k.nomor as string, daftar);
   }
@@ -94,7 +96,7 @@ async function jalankanTugasOtomatis() {
   penanda.__tugasTuntasin = Date.now();
 
   const sekarang = new Date();
-  const kejadianBaru: { nomor: string; jenis: JenisKejadian; waktu: Date; catatan: string }[] = [];
+  const kejadianBaru: { nomor: string; jenis: JenisKejadian; waktu: Date; catatan: string; tingkat: number | null }[] = [];
   for (const l of await muatLaporan()) {
     const tenggat = hitungTenggat(l);
     if (!tenggat || new Date(tenggat.batas) > sekarang) continue;
@@ -104,35 +106,31 @@ async function jalankanTugasOtomatis() {
         jenis: "ditutup_otomatis",
         waktu: new Date(tenggat.batas),
         catatan: "Tidak ada konfirmasi dari pelapor dan pendukung dalam 10 hari.",
+        tingkat: null,
       });
       continue;
     }
-    const sudahEskalasi = l.riwayat.some((k) => k.jenis === "eskalasi" && k.waktu >= tenggat.mulai);
-    if (!sudahEskalasi) {
-      kejadianBaru.push({
-        nomor: l.nomor,
-        jenis: "eskalasi",
-        waktu: new Date(tenggat.batas),
-        catatan: `Melewati batas ${tenggat.tahap.toLowerCase()}. Laporan dieskalasi ke pengawas.`,
-      });
+    for (const e of eskalasiJatuhTempo(l, sekarang)) {
+      kejadianBaru.push({ nomor: l.nomor, jenis: "eskalasi", waktu: e.waktu, catatan: e.catatan, tingkat: e.tingkat });
     }
   }
   if (kejadianBaru.length === 0) return;
 
   await transaksi(async (k) => {
     for (const baru of kejadianBaru) {
-      await k("INSERT INTO kejadian (nomor, jenis, waktu, aktor, catatan) VALUES ($1, $2, $3, 'Sistem', $4)", [
+      await k("INSERT INTO kejadian (nomor, jenis, waktu, aktor, catatan, tingkat) VALUES ($1, $2, $3, 'Sistem', $4, $5)", [
         baru.nomor,
         baru.jenis,
         baru.waktu,
         baru.catatan,
+        baru.tingkat,
       ]);
       await beritahu(
         k,
         baru.nomor,
         baru.jenis === "ditutup_otomatis"
           ? { judul: "Laporan ditutup otomatis", isi: "Tidak ada konfirmasi dalam 10 hari. Kamu masih bisa membukanya ulang selama 30 hari." }
-          : { judul: "Laporan lewat batas waktu", isi: "Laporan sudah dieskalasi ke pengawas instansi." },
+          : { judul: "Laporan dieskalasi", isi: baru.catatan },
         { warga: true, petugas: baru.jenis === "eskalasi" },
       );
     }
