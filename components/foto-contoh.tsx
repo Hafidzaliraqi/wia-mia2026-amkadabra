@@ -1,6 +1,8 @@
 import { ImageIcon } from "lucide-react";
 import type { FotoLaporan, KategoriId } from "@/lib/types";
 import { KategoriIkon } from "@/components/kategori-ikon";
+import { IlustrasiKelompok } from "@/components/ilustrasi-kelompok";
+import { cariKategori } from "@/lib/data/referensi";
 import { formatTanggalJam } from "@/lib/waktu";
 
 // Foto asli dari database, atau tempat foto untuk data contoh
@@ -29,6 +31,20 @@ export function FotoLaporanTampil({
         ))}
         <p className="col-span-full text-sm text-tinta-redup">{label}</p>
       </div>
+    );
+  }
+  if (contoh && kategoriId) {
+    return (
+      <figure>
+        <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-garis">
+          <IlustrasiKelompok kelompok={cariKategori(kategoriId).kelompok} className="size-full" />
+          <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-tinta-redup">
+            <KategoriIkon id={kategoriId} className="size-3.5" />
+            Ilustrasi, data simulasi
+          </span>
+        </div>
+        <figcaption className="mt-2 text-sm text-tinta-redup">{label}</figcaption>
+      </figure>
     );
   }
   return (

@@ -7,7 +7,7 @@ import type { KelompokId, RingkasanLaporan, StatusLaporan } from "@/lib/types";
 import { daftarKategori, daftarKelompok } from "@/lib/data/referensi";
 import { labelStatus } from "@/lib/status";
 import { daftarKota, jarakKm, wilayahTerdekat } from "@/lib/wilayah";
-import { BarisLaporan } from "@/components/baris-laporan";
+import { KartuLaporan } from "@/components/kartu-laporan";
 
 type Urutan = "terbaru" | "dukungan" | "terlambat" | "terdekat";
 const PER_HALAMAN = 20;
@@ -25,6 +25,10 @@ export function JelajahLaporan({ laporan }: { laporan: RingkasanLaporan[] }) {
       awal={{
         cari: parameter.get("cari") ?? "",
         kota: daftarKota.some((k) => k.id === parameter.get("kota")) ? parameter.get("kota")! : "semua",
+        kecamatan:
+          daftarKota.find((k) => k.id === parameter.get("kota"))?.kecamatan.some((c) => c.nama === parameter.get("kecamatan"))
+            ? parameter.get("kecamatan")!
+            : "semua",
         masalah: daftarKelompok.some((k) => k.id === kelompok)
           ? `kelompok:${kelompok}`
           : daftarKategori.some((k) => k.id === kategori)
@@ -35,10 +39,10 @@ export function JelajahLaporan({ laporan }: { laporan: RingkasanLaporan[] }) {
   );
 }
 
-function IsiJelajah({ laporan, awal }: { laporan: RingkasanLaporan[]; awal: { cari: string; kota: string; masalah: string } }) {
+function IsiJelajah({ laporan, awal }: { laporan: RingkasanLaporan[]; awal: { cari: string; kota: string; kecamatan: string; masalah: string } }) {
   const [kataKunci, setKataKunci] = useState(awal.cari);
   const [kota, setKota] = useState(awal.kota);
-  const [kecamatan, setKecamatan] = useState("semua");
+  const [kecamatan, setKecamatan] = useState(awal.kecamatan);
   const [masalah, setMasalah] = useState(awal.masalah);
   const [status, setStatus] = useState<StatusLaporan | "semua">("semua");
   const [urutan, setUrutan] = useState<Urutan>("terbaru");
@@ -224,9 +228,9 @@ function IsiJelajah({ laporan, awal }: { laporan: RingkasanLaporan[]; awal: { ca
       </div>
 
       {hasil.length > 0 ? (
-        <ul className="mt-3 divide-y divide-garis overflow-hidden rounded-2xl border border-garis bg-white">
+        <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {hasil.slice(0, jumlahTampil).map(({ l, jarak }) => (
-            <BarisLaporan key={l.nomor} laporan={l} jarakKm={urutan === "terdekat" ? jarak : null} />
+            <KartuLaporan key={l.nomor} laporan={l} jarakKm={urutan === "terdekat" ? jarak : null} />
           ))}
         </ul>
       ) : (

@@ -3,7 +3,7 @@ import { Logo } from "@/components/logo";
 import { situs } from "@/lib/site";
 
 const kolom = [
-  { judul: "Jelajahi", tautan: [["/laporan", "Jelajah laporan"], ["/transparansi", "Rapor instansi"], ["/tentang", "Tentang & FAQ"], ["/demo", "Simulasi alur"]] },
+  { judul: "Jelajahi", tautan: [["/laporan", "Jelajah laporan"], ["/transparansi", "Rapor instansi"], ["/tentang", "Tentang & FAQ"], ["/demo", "Simulasi alur"], ["/data", "Data terbuka"]] },
   { judul: "Ikut serta", tautan: [["/lapor", "Buat laporan"], ["/daftar", "Daftar akun"], ["/masuk", "Masuk"]] },
 ];
 
