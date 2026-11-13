@@ -187,3 +187,39 @@ export function metrikPublik(semua: Laporan[], kotaId?: string) {
     perKelompok,
   };
 }
+
+// ================================================================
+// PRIORITAS PENANGANAN: gabungan kecamatan + jenis masalah dengan
+// laporan aktif terbanyak. Skor menimbang jumlah laporan, yang lewat
+// batas waktu, dan dukungan warga.
+// ================================================================
+export function prioritasPenanganan(semua: Laporan[], kotaId?: string, jumlah = 5) {
+  const aktif = semua.filter(
+    (l) => (!kotaId || l.kotaId === kotaId) && ["terkirim", "diteruskan", "diproses"].includes(hitungStatus(l)),
+  );
+  const grup = new Map<string, { kotaId: string; kecamatan: string; kelompok: string; laporan: Laporan[] }>();
+  for (const l of aktif) {
+    const kelompok = cariKategori(l.kategoriId).kelompok;
+    const kunci = `${l.kotaId}|${l.kecamatan}|${kelompok}`;
+    if (!grup.has(kunci)) grup.set(kunci, { kotaId: l.kotaId, kecamatan: l.kecamatan, kelompok, laporan: [] });
+    grup.get(kunci)!.laporan.push(l);
+  }
+  return [...grup.values()]
+    .map((g) => {
+      const terlambat = g.laporan.filter(apakahTerlambat).length;
+      const dukungan = g.laporan.reduce((n, l) => n + l.dukungan, 0);
+      return {
+        kotaId: g.kotaId,
+        kota: namaKota(g.kotaId),
+        kecamatan: g.kecamatan,
+        kelompok: g.kelompok,
+        kelompokNama: daftarKelompok.find((k) => k.id === g.kelompok)?.nama ?? g.kelompok,
+        aktif: g.laporan.length,
+        terlambat,
+        dukungan,
+        skor: g.laporan.length * 2 + terlambat * 3 + dukungan / 10,
+      };
+    })
+    .sort((a, b) => b.skor - a.skor)
+    .slice(0, jumlah);
+}

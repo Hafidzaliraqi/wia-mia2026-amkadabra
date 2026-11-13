@@ -115,6 +115,7 @@ export interface Laporan {
   foto: FotoLaporan[];
   riwayat: Kejadian[]; // urut dari paling lama ke paling baru
   sorotan: boolean; // laporan contoh yang ditampilkan di beranda
+  simulasi: boolean; // dibuat dari halaman /demo, tidak masuk daftar publik dan statistik
 }
 
 // Versi ringkas untuk daftar. Semua sudah berupa teks/angka biasa,

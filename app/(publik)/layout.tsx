@@ -9,11 +9,17 @@ import { ambilNotifikasi } from "@/lib/server/notifikasi";
 export default function TataLetakPublik({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+      <a
+        href="#isi"
+        className="sr-only z-50 rounded-xl bg-tinta px-4 py-3 font-semibold text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+      >
+        Lewati ke konten
+      </a>
       {/* Navbar butuh data sesi, jadi dimuat terpisah tanpa menahan isi halaman */}
       <Suspense fallback={<NavAtasTampilan pathname={null} pengguna={undefined} notifikasi={null} />}>
         <NavAtasDenganSesi />
       </Suspense>
-      <main className="flex-1">{children}</main>
+      <main id="isi" className="flex-1">{children}</main>
       <Footer />
       <Suspense fallback={<NavBawahTampilan pathname={null} />}>
         <NavBawahDenganSesi />

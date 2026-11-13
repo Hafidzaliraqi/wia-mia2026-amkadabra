@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { BadgeCheck, ChevronDown, Download, Siren, Timer, Zap } from "lucide-react";
+import { ArrowRight, BadgeCheck, ChevronDown, Database, Download, Siren, Timer, Zap } from "lucide-react";
 import { ambilSemuaLaporan } from "@/lib/server/laporan";
 import {
   BATAS_KONFIRMASI_HARI,
@@ -10,7 +10,9 @@ import {
   daftarKategori,
   daftarKelompok,
 } from "@/lib/data/referensi";
-import { laporanPerBulan, metrikPublik, raporInstansi } from "@/lib/statistik";
+import { laporanPerBulan, metrikPublik, prioritasPenanganan, raporInstansi } from "@/lib/statistik";
+import Link from "next/link";
+import { KepalaHalaman, kelasTombolTerang } from "@/components/kepala-halaman";
 import { AngkaNaik } from "@/components/angka-naik";
 import { PenyegarOtomatis } from "@/components/penyegar-otomatis";
 import { PilihDaerah } from "@/components/transparansi/pilih-daerah";
@@ -27,25 +29,26 @@ export const metadata: Metadata = { title: "Transparansi" };
 
 export default function HalamanTransparansi({ searchParams }: PageProps<"/transparansi">) {
   return (
+    <>
+    <KepalaHalaman
+      label="Data publik"
+      judul="Transparansi"
+      deskripsi="Kinerja setiap instansi dihitung otomatis dari riwayat laporan, tanpa diisi manual. Siapa pun bisa memantau dan membandingkannya."
+      aksi={
+        <>
+          <Link href="/data" className={kelasTombolTerang}>
+            <Database className="size-4" aria-hidden="true" />
+            Data terbuka
+          </Link>
+          <a href="/api/data/laporan" download className={kelasTombolTerang}>
+            <Download className="size-4" aria-hidden="true" />
+            Unduh CSV
+          </a>
+        </>
+      }
+    />
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Transparansi</h1>
-          <p className="mt-2 max-w-2xl text-tinta-redup">
-            Kinerja setiap instansi dihitung otomatis dari riwayat laporan, tanpa diisi manual.
-          </p>
-        </div>
-        <a
-          href="/api/data/laporan"
-          download
-          className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold ring-1 ring-garis ring-inset transition hover:ring-rambu"
-        >
-          <Download className="size-4" aria-hidden="true" />
-          Unduh data (CSV)
-        </a>
-      </div>
-
-      <Suspense fallback={<div className="mt-8 h-[36rem] animate-pulse rounded-3xl bg-white motion-reduce:animate-none" />}>
+      <Suspense fallback={<div className="h-[36rem] animate-pulse rounded-3xl bg-white motion-reduce:animate-none" />}>
         <BagianKinerja searchParams={searchParams} />
       </Suspense>
 
@@ -116,6 +119,7 @@ export default function HalamanTransparansi({ searchParams }: PageProps<"/transp
         </section>
       </div>
     </div>
+    </>
   );
 }
 
@@ -123,7 +127,9 @@ async function BagianKinerja({ searchParams }: Pick<PageProps<"/transparansi">, 
   await connection();
   const { kota } = await searchParams;
   const kotaId = typeof kota === "string" && daftarKota.some((k) => k.id === kota) ? kota : undefined;
-  const m = metrikPublik(await ambilSemuaLaporan(), kotaId);
+  const semua = await ambilSemuaLaporan();
+  const m = metrikPublik(semua, kotaId);
+  const prioritas = prioritasPenanganan(semua, kotaId);
   const totalEskalasi = m.eskalasi.reduce((a, b) => a + b, 0);
   const maksEskalasi = Math.max(1, ...m.eskalasi);
   const kartu = [
@@ -135,7 +141,7 @@ async function BagianKinerja({ searchParams }: Pick<PageProps<"/transparansi">, 
   const tingkatNama = ["Pimpinan instansi", "Inspektorat", "Kepala daerah"];
 
   return (
-    <section className="mt-8" aria-labelledby="judul-kinerja">
+    <section aria-labelledby="judul-kinerja">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <h2 id="judul-kinerja" className="text-2xl font-extrabold">
@@ -193,6 +199,46 @@ async function BagianKinerja({ searchParams }: Pick<PageProps<"/transparansi">, 
             Lewat batas waktu naik ke pimpinan instansi, 3 hari kerja kemudian ke inspektorat, lalu 5 hari kerja kemudian ke kepala daerah.
           </p>
         </div>
+      </div>
+
+      <div className="mt-4 rounded-3xl border border-garis bg-white p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="text-lg font-bold">Prioritas penanganan</h3>
+          <p className="text-sm text-tinta-redup">Bahan menentukan prioritas petugas dan anggaran</p>
+        </div>
+        <p className="mt-1 text-sm text-tinta-redup">
+          Kecamatan dan jenis masalah dengan laporan aktif terbanyak, ditimbang dari jumlah laporan, yang lewat batas waktu, dan
+          dukungan warga.
+        </p>
+        {prioritas.length === 0 ? (
+          <p className="mt-5 rounded-xl bg-kertas px-4 py-6 text-center text-sm text-tinta-redup">Tidak ada laporan aktif di daerah ini.</p>
+        ) : (
+          <ol className="mt-5 divide-y divide-garis">
+            {prioritas.map((p, i) => (
+              <li key={`${p.kotaId}-${p.kecamatan}-${p.kelompok}`}>
+                <Link
+                  href={`/laporan?kota=${p.kotaId}&kecamatan=${encodeURIComponent(p.kecamatan)}&kelompok=${p.kelompok}`}
+                  className="group flex items-center gap-4 py-3.5"
+                >
+                  <span className={`font-display text-2xl font-extrabold ${i === 0 ? "text-bahaya" : "text-tinta-redup"}`}>{i + 1}</span>
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-rambu-muda text-rambu">
+                    <KelompokIkon id={p.kelompok as Parameters<typeof KelompokIkon>[0]["id"]} className="size-4" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold group-hover:text-rambu">
+                      {p.kelompokNama} di Kec. {p.kecamatan}
+                    </span>
+                    <span className="block text-sm text-tinta-redup">
+                      {p.kota} · {p.aktif} laporan aktif
+                      {p.terlambat > 0 && <span className="font-semibold text-bahaya"> · {p.terlambat} lewat batas</span>} · {p.dukungan} dukungan
+                    </span>
+                  </span>
+                  <ArrowRight className="size-4 shrink-0 text-tinta-redup transition group-hover:translate-x-0.5 group-hover:text-rambu" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
 
       <div className="mt-4 rounded-3xl border border-garis bg-white p-6">

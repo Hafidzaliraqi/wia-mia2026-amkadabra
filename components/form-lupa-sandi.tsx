@@ -1,18 +1,16 @@
 "use client";
 
+import { pindahHalamanPenuh } from "@/lib/pindah-akun";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+
 import { KolomIsian } from "@/components/kolom-isian";
 import { KolomKode } from "@/components/kolom-kode";
 import { Tombol } from "@/components/dialog";
-import { useToast } from "@/components/toast";
 import { aturSandiBaru, mintaAturSandi } from "@/lib/aksi/akun";
 import { periksaSandi } from "@/lib/validasi";
 
 export function FormLupaSandi() {
-  const router = useRouter();
-  const toast = useToast();
   const [akun, setAkun] = useState("");
   const [otp, setOtp] = useState<{ id: string; tujuan: string } | null>(null);
   const [kode, setKode] = useState("");
@@ -38,9 +36,7 @@ export function FormLupaSandi() {
     mulai(async () => {
       const hasil = await aturSandiBaru(otp!.id, kode, sandi);
       if (!hasil.ok) return setGalat({ kode: hasil.galat?.kode ?? (hasil.galat?.sandi ? undefined : hasil.pesan), sandi: hasil.galat?.sandi });
-      toast("sukses", "Kata sandi baru tersimpan. Kamu sudah masuk.");
-      router.push(hasil.tujuan);
-      router.refresh();
+      pindahHalamanPenuh(hasil.tujuan, "Kata sandi baru tersimpan. Kamu sudah masuk.");
     });
   }
 

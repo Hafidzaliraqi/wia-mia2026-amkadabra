@@ -81,6 +81,7 @@ async function muatLaporan(nomor?: string): Promise<Laporan[]> {
     foto: fotoPer.get(b.nomor as string) ?? [],
     riwayat: riwayatPer.get(b.nomor as string) ?? [],
     sorotan: Boolean(b.sorotan),
+    simulasi: Boolean(b.simulasi),
   }));
 }
 
@@ -140,9 +141,10 @@ async function jalankanTugasOtomatis() {
 // ---------------- akses data ----------------
 
 // Semua laporan termasuk yang privat. cache() = sekali query per permintaan.
+// Laporan dari simulasi presentasi (/demo) tidak ikut daftar publik dan statistik.
 export const ambilSemuaLaporan = cache(async (): Promise<Laporan[]> => {
   await jalankanTugasOtomatis();
-  return muatLaporan();
+  return (await muatLaporan()).filter((l) => !l.simulasi);
 });
 
 export const ambilLaporan = cache(async (nomor: string): Promise<Laporan | null> => {

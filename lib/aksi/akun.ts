@@ -1,5 +1,7 @@
 "use server";
 
+import { daftarInstansi } from "@/lib/data/referensi";
+
 import { randomUUID } from "node:crypto";
 import { kueri, transaksi } from "@/lib/server/db";
 import { emailKodeOtp, emailSiap, kirimEmail } from "@/lib/server/email";
@@ -179,9 +181,34 @@ export async function masuk(akun: string, sandi: string, lanjut: string | null):
 // Masuk sekali klik ke akun demo, supaya juri bisa mencoba tanpa daftar
 const AKUN_DEMO = { warga: "warga@demo.id", petugas: "petugas.dpu@demo.id", admin: "admin@demo.id" } as const;
 
-export async function masukDemo(peran: keyof typeof AKUN_DEMO): Promise<HasilAksi<{ tujuan: string; nama: string }>> {
-  const email = AKUN_DEMO[peran];
+// Akun petugas demo lama tetap dipakai untuk tiga instansi Jakarta Selatan
+const PETUGAS_DEMO_LAMA: Record<string, string> = {
+  "dpu-jaksel": "petugas.dpu@demo.id",
+  "dishub-jaksel": "petugas.dishub@demo.id",
+  "sda-jaksel": "petugas.sda@demo.id",
+};
+
+export async function masukDemo(
+  peran: keyof typeof AKUN_DEMO,
+  instansiId?: string,
+): Promise<HasilAksi<{ tujuan: string; nama: string }>> {
+  if (process.env.MODE_DEMO === "0") return gagal("Mode demo sedang dimatikan.");
+  let email: string = AKUN_DEMO[peran];
   if (!email) return gagal("Akun demo tidak dikenal.");
+  if (peran === "petugas" && instansiId) {
+    const urutan = daftarInstansi.findIndex((i) => i.id === instansiId);
+    if (urutan < 0) return gagal("Instansi tidak dikenal.");
+    const instansi = daftarInstansi[urutan];
+    email = PETUGAS_DEMO_LAMA[instansi.id] ?? `petugas.${instansi.id}@demo.id`;
+    const [ada] = await kueri<{ id: string }>("SELECT id FROM pengguna WHERE email = $1", [email]);
+    if (!ada) {
+      await kueri(
+        `INSERT INTO pengguna (nama, email, hp, hash_sandi, peran, instansi_id)
+         VALUES ($1, $2, $3, $4, 'petugas', $5) ON CONFLICT (email) DO NOTHING`,
+        [`Petugas ${instansi.singkatan}`, email, `08129${String(urutan).padStart(6, "0")}`, await hashSandi("demo1234"), instansi.id],
+      );
+    }
+  }
   const [baris] = await kueri<{ id: string; nama: string; peran: string }>("SELECT id, nama, peran FROM pengguna WHERE email = $1", [email]);
   if (!baris) return gagal("Akun demo belum tersedia.");
   await kueri("UPDATE pengguna SET gagal_masuk = 0, terkunci_sampai = NULL WHERE id = $1", [baris.id]);

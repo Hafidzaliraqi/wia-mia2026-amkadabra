@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useOptimistic, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useOptimistic, useRef, useState, useTransition } from "react";
 import { MessagesSquare, Send } from "lucide-react";
 import { useToast } from "@/components/toast";
 import { kirimTanggapan } from "@/lib/aksi/laporan";
@@ -35,6 +35,7 @@ export function Percakapan({
   const [memproses, mulai] = useTransition();
   const [daftar, tambahOptimis] = useOptimistic(pesan, (lama, baru: PesanPercakapan) => [...lama, baru]);
   const wadah = useRef<HTMLDivElement>(null);
+  const idUnik = useId();
 
   useEffect(() => {
     wadah.current?.scrollTo({ top: wadah.current.scrollHeight, behavior: "smooth" });
@@ -57,10 +58,10 @@ export function Percakapan({
   }
 
   return (
-    <section className="rounded-2xl border border-garis bg-white p-5 sm:p-6" aria-labelledby={`judul-percakapan-${nomor}`}>
+    <section className="rounded-2xl border border-garis bg-white p-5 sm:p-6" aria-labelledby={`judul-percakapan-${idUnik}`}>
       <div className="flex items-center gap-2">
         <MessagesSquare className="size-5 text-rambu" aria-hidden="true" />
-        <h2 id={`judul-percakapan-${nomor}`} className="font-bold">
+        <h2 id={`judul-percakapan-${idUnik}`} className="font-bold">
           Percakapan dengan {sebagai === "warga" ? "petugas" : "warga"}
         </h2>
         <span className="angka ml-auto rounded-full bg-kertas px-2 py-0.5 text-xs font-semibold text-tinta-redup">{daftar.length}</span>
@@ -103,11 +104,11 @@ export function Percakapan({
             kirim();
           }}
         >
-          <label htmlFor={`isi-pesan-${nomor}`} className="sr-only">
+          <label htmlFor={`isi-pesan-${idUnik}`} className="sr-only">
             Tulis pesan
           </label>
           <textarea
-            id={`isi-pesan-${nomor}`}
+            id={`isi-pesan-${idUnik}`}
             rows={2}
             value={isi}
             maxLength={1000}

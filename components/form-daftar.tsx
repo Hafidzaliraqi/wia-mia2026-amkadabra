@@ -1,8 +1,9 @@
 "use client";
 
+import { pindahHalamanPenuh } from "@/lib/pindah-akun";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { KolomIsian } from "@/components/kolom-isian";
 import { KolomKode } from "@/components/kolom-kode";
 import { Tombol } from "@/components/dialog";
@@ -15,7 +16,6 @@ import { rayakan } from "@/lib/rayakan";
 type Galat = Partial<Record<"nama" | "email" | "hp" | "sandi" | "setuju" | "kode" | "umum", string>>;
 
 export function FormDaftar() {
-  const router = useRouter();
   const toast = useToast();
   const lanjut = useSearchParams().get("lanjut");
   const [nama, setNama] = useState("");
@@ -59,9 +59,7 @@ export function FormDaftar() {
         return setGalat({ kode: hasil.pesan });
       }
       rayakan();
-      toast("sukses", `Akun berhasil dibuat. Selamat datang, ${hasil.nama.split(" ")[0]}!`);
-      router.push(lanjut ? hasil.tujuan : "/lapor");
-      router.refresh();
+      pindahHalamanPenuh(lanjut ? hasil.tujuan : "/lapor", `Akun berhasil dibuat. Selamat datang, ${hasil.nama.split(" ")[0]}!`);
     });
   }
 

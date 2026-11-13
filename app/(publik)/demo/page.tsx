@@ -14,22 +14,24 @@ import { StatusBadge } from "@/components/status-badge";
 import { TanggaEskalasi } from "@/components/tangga-eskalasi";
 import { PanelSimulasi } from "@/components/simulasi/panel-simulasi";
 import { LogIntegrasi } from "@/components/simulasi/log-integrasi";
+import { KepalaHalaman } from "@/components/kepala-halaman";
 
 export const metadata: Metadata = { title: "Simulasi alur" };
 
 export default function HalamanSimulasi({ searchParams }: PageProps<"/demo">) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
-      <p className="text-sm font-bold tracking-wide text-rambu uppercase">Mode presentasi</p>
-      <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">Simulasi alur lengkap</h1>
-      <p className="mt-2 max-w-2xl text-tinta-redup">
-        Jalankan perjalanan satu laporan dari warga sampai tuntas, satu klik per tahap. Setiap perubahan langsung tampil di halaman
-        publik dan tercatat di log integrasi.
-      </p>
+    <>
+    <KepalaHalaman
+      label="Mode presentasi"
+      judul="Simulasi alur lengkap"
+      deskripsi="Jalankan perjalanan satu laporan dari warga sampai tuntas, satu klik per tahap. Setiap perubahan langsung tampil di halaman publik dan tercatat di log integrasi."
+    />
+    <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6 lg:pb-12">
       <Suspense fallback={<div className="mt-8 h-96 animate-pulse rounded-3xl bg-white motion-reduce:animate-none" />}>
         <IsiSimulasi searchParams={searchParams} />
       </Suspense>
     </div>
+    </>
   );
 }
 

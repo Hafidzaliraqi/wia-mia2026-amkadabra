@@ -12,6 +12,8 @@ import { formatRelatif } from "@/lib/waktu";
 import { DetailLaporanDasbor } from "@/components/dasbor/detail-laporan";
 import { PenyegarOtomatis } from "@/components/penyegar-otomatis";
 import { PanelAdmin } from "@/components/dasbor/aksi-admin";
+import { PanelDemoLaporan } from "@/components/panel-demo-laporan";
+import { langkahDemo } from "@/lib/server/langkah-demo";
 import { Percakapan } from "@/components/percakapan";
 import { susunPercakapan } from "@/lib/server/percakapan";
 
@@ -32,6 +34,7 @@ async function IsiPeriksa({ params }: Pick<PageProps<"/admin/laporan/[id]">, "pa
   if (!laporan) notFound();
 
   const status = hitungStatus(laporan);
+  const demo = await langkahDemo(laporan);
   const risiko = (await hitungRisiko([laporan], await jumlahTandaTidakSesuai())).get(laporan.nomor) ?? [];
   const tanda = await kueri<{ alasan: string; dibuat_pada: Date }>(
     "SELECT alasan, dibuat_pada FROM tanda_tidak_sesuai WHERE nomor = $1 ORDER BY dibuat_pada DESC",
@@ -46,6 +49,7 @@ async function IsiPeriksa({ params }: Pick<PageProps<"/admin/laporan/[id]">, "pa
       kembali={{ href: "/admin", label: "Antrean verifikasi" }}
       tambahan={
         <>
+        {demo && demo.peran !== "admin" && <PanelDemoLaporan langkah={demo} />}
         <Percakapan nomor={laporan.nomor} pesan={susunPercakapan(laporan, null, "petugas")} sebagai="admin" bisaKirim={false} keteranganTutup="Admin memantau percakapan petugas dan warga." />
         {tanda.length > 0 && (
           <section className="rounded-2xl border border-garis bg-white p-5 sm:p-6">

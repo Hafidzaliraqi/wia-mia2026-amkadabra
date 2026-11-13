@@ -5,41 +5,60 @@ import { apakahTerlambat, hitungStatus } from "@/lib/sla";
 import { tingkatSaatIni } from "@/lib/eskalasi";
 import { namaKota } from "@/lib/wilayah";
 
-// Data terbuka: semua laporan publik dalam format CSV (tanpa identitas pelapor)
-export async function GET() {
+// ================================================================
+// DATA TERBUKA: laporan publik tanpa identitas pelapor.
+// GET /api/data/laporan                → CSV
+// GET /api/data/laporan?format=json    → JSON
+// Filter opsional: kota, status, kelompok
+// ================================================================
+export async function GET(permintaan: Request) {
   await connection();
-  const laporan = (await ambilSemuaLaporan()).filter((l) => l.visibilitas !== "privat");
+  const p = new URL(permintaan.url).searchParams;
+  const kota = p.get("kota");
+  const status = p.get("status");
+  const kelompok = p.get("kelompok");
+
+  const baris = (await ambilSemuaLaporan())
+    .filter((l) => l.visibilitas !== "privat")
+    .filter((l) => !kota || l.kotaId === kota)
+    .filter((l) => !status || hitungStatus(l) === status)
+    .filter((l) => !kelompok || cariKategori(l.kategoriId).kelompok === kelompok)
+    .map((l) => {
+      const kategori = cariKategori(l.kategoriId);
+      return {
+        nomor: l.nomor,
+        judul: l.judul,
+        jenis_masalah: kategori.nama,
+        kelompok: daftarKelompok.find((g) => g.id === kategori.kelompok)?.nama ?? "",
+        kota: namaKota(l.kotaId),
+        kecamatan: l.kecamatan,
+        instansi: cariInstansi(l.instansiId).nama,
+        status: hitungStatus(l),
+        dibuat: l.dibuatPada,
+        ditandai_selesai: [...l.riwayat].reverse().find((k) => k.jenis === "ditandai_selesai")?.waktu ?? null,
+        lewat_batas: apakahTerlambat(l),
+        tingkat_eskalasi: tingkatSaatIni(l),
+        dukungan: l.dukungan,
+      };
+    });
+
+  if (p.get("format") === "json") {
+    return Response.json(
+      { sumber: "Tuntasin", diperbarui: new Date().toISOString(), jumlah: baris.length, data: baris },
+      { headers: { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" } },
+    );
+  }
+
+  const kolom = Object.keys(baris[0] ?? { nomor: "" });
   const sel = (v: unknown) => {
-    const s = String(v ?? "");
+    const s = v === true ? "ya" : v === false ? "tidak" : String(v ?? "");
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  const kolom = ["nomor", "judul", "jenis_masalah", "kelompok", "kota", "kecamatan", "instansi", "status", "dibuat", "ditandai_selesai", "lewat_batas", "tingkat_eskalasi", "dukungan"];
-  const baris = laporan.map((l) => {
-    const kategori = cariKategori(l.kategoriId);
-    const selesai = [...l.riwayat].reverse().find((k) => k.jenis === "ditandai_selesai")?.waktu ?? "";
-    return [
-      l.nomor,
-      l.judul,
-      kategori.nama,
-      daftarKelompok.find((g) => g.id === kategori.kelompok)?.nama ?? "",
-      namaKota(l.kotaId),
-      l.kecamatan,
-      cariInstansi(l.instansiId).nama,
-      hitungStatus(l),
-      l.dibuatPada,
-      selesai,
-      apakahTerlambat(l) ? "ya" : "tidak",
-      tingkatSaatIni(l),
-      l.dukungan,
-    ]
-      .map(sel)
-      .join(",");
-  });
-  const tanggal = new Date().toISOString().slice(0, 10);
-  return new Response("\uFEFF" + [kolom.join(","), ...baris].join("\n"), {
+  const isi = [kolom.join(","), ...baris.map((b) => Object.values(b).map(sel).join(","))].join("\n");
+  return new Response("\uFEFF" + isi, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="tuntasin-laporan-${tanggal}.csv"`,
+      "Content-Disposition": `attachment; filename="tuntasin-laporan-${new Date().toISOString().slice(0, 10)}.csv"`,
       "Cache-Control": "no-store",
     },
   });

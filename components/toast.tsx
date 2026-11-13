@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { KUNCI_PESAN_TOAST } from "@/lib/pindah-akun";
 import { CircleAlert, CircleCheck, Info, X } from "lucide-react";
 
 type Jenis = "sukses" | "galat" | "info";
@@ -32,6 +33,21 @@ export function PenyediaToast({ children }: { children: React.ReactNode }) {
     },
     [tutup],
   );
+
+  useEffect(() => {
+    let pesan: string | null = null;
+    try {
+      pesan = sessionStorage.getItem(KUNCI_PESAN_TOAST);
+      if (pesan) sessionStorage.removeItem(KUNCI_PESAN_TOAST);
+    } catch {
+      pesan = null;
+    }
+    if (pesan) {
+      const teks = pesan;
+      const pewaktu = window.setTimeout(() => tampilkan("sukses", teks), 0);
+      return () => window.clearTimeout(pewaktu);
+    }
+  }, [tampilkan]);
 
   return (
     <KonteksToast value={tampilkan}>
