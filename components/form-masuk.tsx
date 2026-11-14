@@ -2,18 +2,20 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { KeyRound } from "lucide-react";
 import { KolomIsian } from "@/components/kolom-isian";
 import { Tombol } from "@/components/dialog";
 import { useToast } from "@/components/toast";
 import { masuk, masukDemo } from "@/lib/aksi/akun";
 import { tujuanAman } from "@/lib/tujuan";
+import { pindahHalamanPenuh } from "@/lib/pindah-akun";
+import { daftarInstansi } from "@/lib/data/referensi";
+import { daftarKota } from "@/lib/wilayah";
 
 // Akun contoh untuk juri (dibuat otomatis bersama data contoh)
 
 export function FormMasuk() {
-  const router = useRouter();
   const toast = useToast();
   const lanjut = useSearchParams().get("lanjut");
   const [akun, setAkun] = useState("");
@@ -30,9 +32,7 @@ export function FormMasuk() {
     mulai(async () => {
       const hasil = await masuk(akun, sandi, lanjut);
       if (!hasil.ok) return setGalat(hasil.pesan);
-      toast("sukses", `Selamat datang, ${hasil.nama.split(" ")[0]}!`);
-      router.push(hasil.tujuan);
-      router.refresh();
+      pindahHalamanPenuh(hasil.tujuan, `Selamat datang, ${hasil.nama.split(" ")[0]}!`);
     });
   }
 
@@ -64,9 +64,7 @@ export function FormMasuk() {
                     setMemprosesDemo(null);
                     return toast("galat", hasil.pesan);
                   }
-                  toast("sukses", `Masuk sebagai ${hasil.nama}.`);
-                  router.push(hasil.tujuan);
-                  router.refresh();
+                  pindahHalamanPenuh(hasil.tujuan, `Masuk sebagai ${hasil.nama}.`);
                 });
               }}
               className="rounded-xl bg-white px-2 py-2.5 text-sm font-semibold text-rambu ring-1 ring-rambu/30 ring-inset transition hover:bg-rambu hover:text-white disabled:opacity-60"
@@ -75,6 +73,41 @@ export function FormMasuk() {
             </button>
           ))}
         </div>
+        <label htmlFor="petugas-lain" className="mt-3 block text-xs font-semibold text-tinta-redup">
+          Atau masuk sebagai petugas instansi lain
+        </label>
+        <select
+          id="petugas-lain"
+          defaultValue=""
+          disabled={memprosesDemo !== null}
+          onChange={(e) => {
+            const instansiId = e.target.value;
+            if (!instansiId) return;
+            setMemprosesDemo("petugas");
+            mulaiDemo(async () => {
+              const hasil = await masukDemo("petugas", instansiId);
+              if (!hasil.ok) {
+                setMemprosesDemo(null);
+                return toast("galat", hasil.pesan);
+              }
+              pindahHalamanPenuh(hasil.tujuan, `Masuk sebagai ${hasil.nama}.`);
+            });
+          }}
+          className="mt-1 w-full rounded-xl border border-garis bg-white px-3 py-2.5 text-sm focus:border-rambu focus:outline-none"
+        >
+          <option value="">Pilih instansi…</option>
+          {daftarKota.map((k) => (
+            <optgroup key={k.id} label={k.nama}>
+              {daftarInstansi
+                .filter((i) => i.kotaId === k.id)
+                .map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.nama}
+                  </option>
+                ))}
+            </optgroup>
+          ))}
+        </select>
       </section>
 
       <form onSubmit={kirim} className="space-y-5" noValidate>

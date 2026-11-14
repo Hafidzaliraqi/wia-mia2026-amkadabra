@@ -15,6 +15,8 @@ import { AksiWarga } from "@/components/aksi-warga";
 import { Percakapan } from "@/components/percakapan";
 import { PenyegarOtomatis } from "@/components/penyegar-otomatis";
 import { TombolBagikan } from "@/components/tombol-bagikan";
+import { PanelDemoLaporan } from "@/components/panel-demo-laporan";
+import { langkahDemo } from "@/lib/server/langkah-demo";
 import { TanggaEskalasi } from "@/components/tangga-eskalasi";
 import { BarAksiSeluler } from "@/components/bar-aksi-seluler";
 import { susunPercakapan } from "@/lib/server/percakapan";
@@ -68,6 +70,7 @@ async function IsiDetail({ params }: Pick<PageProps<"/laporan/[id]">, "params">)
   const nomor = normalisasiNomor(id);
   const [laporan, pengguna] = await Promise.all([ambilLaporan(nomor), penggunaSaatIni()]);
   if (!laporan || !bolehDilihat(laporan, pengguna?.id ?? null, pengguna?.peran ?? null)) notFound();
+  const demo = await langkahDemo(laporan);
 
   const status = hitungStatus(laporan);
   const tenggat = hitungTenggat(laporan);
@@ -289,6 +292,7 @@ async function IsiDetail({ params }: Pick<PageProps<"/laporan/[id]">, "params">)
               mulai dikerjakan.
             </p>
           </section>
+          {demo && <PanelDemoLaporan langkah={demo} />}
           <TombolBagikan nomor={laporan.nomor} judul={laporan.judul} />
           <section className="rounded-2xl border border-garis bg-white p-5">
             <h2 className="sr-only">Dukungan warga</h2>

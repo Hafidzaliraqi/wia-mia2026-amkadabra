@@ -115,13 +115,16 @@ export default function HalamanTentang() {
     <div className="pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(dataTerstruktur) }} />
 
-      <section className="border-b border-garis bg-white">
+      <section className="relative isolate overflow-hidden bg-malam text-white">
+        <div aria-hidden="true" className="latar-kisi absolute inset-0 -z-10" />
+        <div aria-hidden="true" className="absolute -top-44 right-[-10%] -z-10 size-[34rem] rounded-full bg-rambu/40 blur-[110px]" />
+        <div aria-hidden="true" className="absolute -bottom-56 left-[-12%] -z-10 size-[26rem] rounded-full bg-sinyal/10 blur-[110px]" />
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
-          <p className="text-sm font-semibold text-rambu">Tentang {situs.nama}</p>
-          <h1 className="mt-2 max-w-3xl text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <p className="text-sm font-bold tracking-wide text-sinyal uppercase">Tentang {situs.nama}</p>
+          <h1 className="mt-2 max-w-3xl text-4xl font-extrabold tracking-tight sm:text-5xl">
             Laporan warga yang tidak berhenti di tengah jalan
           </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-tinta-redup">
+          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/70">
             {situs.nama} meneruskan laporan ke instansi yang tepat, menampilkan batas waktu setiap tahap ke publik, dan baru menutup
             laporan setelah warga memastikan masalahnya benar-benar beres.
           </p>
@@ -133,7 +136,7 @@ export default function HalamanTentang() {
               ["#inspirasi", "Inspirasi"],
               ["#faq", "FAQ"],
             ].map(([href, label]) => (
-              <a key={href} href={href} className="rounded-full px-3.5 py-1.5 font-semibold ring-1 ring-garis ring-inset hover:bg-kertas hover:text-rambu">
+              <a key={href} href={href} className="rounded-full bg-white/10 px-3.5 py-1.5 font-semibold ring-1 ring-white/20 ring-inset backdrop-blur transition hover:bg-white/20">
                 {label}
               </a>
             ))}

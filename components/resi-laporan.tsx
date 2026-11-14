@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Laporan } from "@/lib/types";
-import { cariInstansi } from "@/lib/data/referensi";
+import { cariInstansi, cariKategori } from "@/lib/data/referensi";
+import { warnaKelompok } from "@/lib/warna-kelompok";
 import { hitungStatus, hitungTenggat } from "@/lib/sla";
 import { KategoriIkon } from "@/components/kategori-ikon";
 import { LangkahStatus } from "@/components/langkah-status";
@@ -24,7 +25,7 @@ export function ResiLaporan({ laporan }: { laporan: Laporan }) {
           <StatusBadge status={status} />
         </div>
         <div className="mt-5 flex gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-kertas">
+          <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${warnaKelompok[cariKategori(laporan.kategoriId).kelompok].tile}`}>
             <KategoriIkon id={laporan.kategoriId} />
           </span>
           <div>

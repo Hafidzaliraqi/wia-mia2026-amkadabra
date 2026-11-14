@@ -58,7 +58,8 @@ export async function buatLaporan(form: FormData): Promise<HasilAksi<{ nomor: st
     "SELECT count(*)::int AS jumlah FROM laporan WHERE pelapor_id = $1 AND dibuat_pada > now() - interval '1 hour'",
     [pengguna.id],
   );
-  if (jumlah >= 5) return gagal("Kamu sudah mengirim 5 laporan dalam 1 jam terakhir. Coba lagi nanti.");
+  const batasPerJam = pengguna.email.endsWith("@demo.id") ? 30 : 5;
+  if (jumlah >= batasPerJam) return gagal(`Kamu sudah mengirim ${batasPerJam} laporan dalam 1 jam terakhir. Coba lagi nanti.`);
 
   const berkas = form.getAll("foto").filter((f): f is File => f instanceof File && f.size > 0);
   if (berkas.length > MAKS_FOTO) return gagal(`Maksimal ${MAKS_FOTO} foto.`);

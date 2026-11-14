@@ -3,6 +3,7 @@ import { ThumbsUp } from "lucide-react";
 import type { RingkasanLaporan } from "@/lib/types";
 import { KategoriIkon } from "@/components/kategori-ikon";
 import { StatusBadge, TerlambatBadge } from "@/components/status-badge";
+import { warnaKelompok } from "@/lib/warna-kelompok";
 
 // Satu baris laporan di daftar. Datanya sudah berupa teks,
 // jadi aman dipakai di komponen server maupun client.
@@ -13,7 +14,7 @@ export function BarisLaporan({ laporan, jarakKm }: { laporan: RingkasanLaporan; 
         href={`/laporan/${laporan.nomor}`}
         className="group flex gap-4 px-4 py-4 transition-colors hover:bg-kertas/70 sm:px-5"
       >
-        <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-kertas text-tinta transition-colors group-hover:bg-rambu-muda group-hover:text-rambu-tua">
+        <span className={`mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105 ${warnaKelompok[laporan.kelompok].tile}`}>
           <KategoriIkon id={laporan.kategoriId} />
         </span>
         <div className="min-w-0 flex-1">

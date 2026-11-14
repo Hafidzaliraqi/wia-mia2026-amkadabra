@@ -18,7 +18,9 @@ export default function HalamanPetugas() {
         <h1 className="text-3xl font-extrabold tracking-tight">Laporan instansi</h1>
         <PenyegarOtomatis detik={20} />
       </div>
-      <p className="mt-1 text-tinta-redup">Diurutkan dari tenggat paling dekat. Kerjakan yang paling mendesak dulu.</p>
+      <p className="mt-1 text-tinta-redup">
+        Laporan masuk ke sini setelah diverifikasi admin dan diteruskan ke instansimu. Diurutkan dari tenggat paling dekat.
+      </p>
       <Suspense fallback={<div className="mt-6 h-96 animate-pulse rounded-2xl bg-white motion-reduce:animate-none" />}>
         <IsiPetugas />
       </Suspense>

@@ -1,5 +1,6 @@
 "use client";
 
+import { pindahHalamanPenuh } from "@/lib/pindah-akun";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
@@ -21,7 +22,7 @@ import type { NotifikasiRingkas, PenggunaRingkas } from "@/lib/types";
 import { Logo } from "@/components/logo";
 import { KelompokIkon } from "@/components/kategori-ikon";
 import { Dialog, Tombol } from "@/components/dialog";
-import { useToast } from "@/components/toast";
+
 import { daftarKelompok } from "@/lib/data/referensi";
 import { normalisasiNomor } from "@/lib/nomor";
 import { keluar } from "@/lib/aksi/akun";
@@ -358,16 +359,12 @@ export function LoncengNotifikasi({ data, rataKiri = false }: { data: DataNotifi
 }
 
 export function useKeluar() {
-  const router = useRouter();
-  const toast = useToast();
   const [memproses, mulai] = useTransition();
   const jalankan = (setelah?: () => void) =>
     mulai(async () => {
       await keluar();
       setelah?.();
-      toast("sukses", "Kamu sudah keluar. Sampai jumpa lagi!");
-      router.push("/");
-      router.refresh();
+      pindahHalamanPenuh("/", "Kamu sudah keluar. Sampai jumpa lagi!");
     });
   return { memproses, jalankan };
 }

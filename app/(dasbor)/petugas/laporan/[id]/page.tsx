@@ -10,6 +10,9 @@ import { normalisasiNomor } from "@/lib/nomor";
 import { DetailLaporanDasbor } from "@/components/dasbor/detail-laporan";
 import { PenyegarOtomatis } from "@/components/penyegar-otomatis";
 import { PanelPetugas } from "@/components/dasbor/aksi-petugas";
+import { PanelDemoLaporan } from "@/components/panel-demo-laporan";
+import { langkahDemo } from "@/lib/server/langkah-demo";
+import Link from "next/link";
 import { Percakapan } from "@/components/percakapan";
 import { susunPercakapan } from "@/lib/server/percakapan";
 
@@ -27,7 +30,29 @@ async function IsiKelola({ params }: Pick<PageProps<"/petugas/laporan/[id]">, "p
   await connection();
   const { id } = await params;
   const [laporan, pengguna] = await Promise.all([ambilLaporan(normalisasiNomor(id)), penggunaSaatIni()]);
-  if (!laporan || !pengguna || laporan.instansiId !== pengguna.instansiId) notFound();
+  if (!laporan || !pengguna) notFound();
+  if (laporan.instansiId !== pengguna.instansiId || hitungStatus(laporan) === "terkirim") {
+    const tujuan = cariInstansi(laporan.instansiId);
+    const menunggu = hitungStatus(laporan) === "terkirim";
+    const demo = await langkahDemo(laporan);
+    return (
+      <div className="mx-auto max-w-xl py-10">
+        <p className="kode text-sm font-semibold text-tinta-redup">{laporan.nomor}</p>
+        <h1 className="mt-1 text-2xl font-extrabold">{laporan.judul}</h1>
+        <p className="mt-3 leading-relaxed text-tinta-redup">
+          {menunggu
+            ? "Laporan ini masih menunggu verifikasi admin. Setelah diverifikasi, laporan otomatis masuk ke antrean instansi yang berwenang."
+            : `Laporan ini ditangani ${tujuan.nama}. Akunmu adalah petugas ${pengguna.instansiId ? cariInstansi(pengguna.instansiId).nama : "instansi lain"}, jadi laporan ini tidak ada di antreanmu.`}
+        </p>
+        <div className="mt-6 space-y-3">
+          {demo && <PanelDemoLaporan langkah={demo} />}
+          <Link href="/petugas" className="inline-flex items-center gap-1.5 text-sm font-semibold text-rambu hover:text-rambu-tua">
+            Kembali ke antrean instansi
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const status = hitungStatus(laporan);
   const tenggat = hitungTenggat(laporan);
